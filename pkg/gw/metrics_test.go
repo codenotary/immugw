@@ -121,8 +121,8 @@ func TestUpdateAuditResult(t *testing.T) {
 		true,
 		false,
 		true,
-		&schema.Root{Index: 0, Root: []byte{1}},
-		&schema.Root{Index: 1, Root: []byte{2}},
+		&schema.Root{Payload: &schema.RootIndex{Index: 0, Root: []byte{1}}},
+		&schema.Root{Payload: &schema.RootIndex{Index: 1, Root: []byte{2}}},
 	)
 	require.Equal(t, 0., ms.mc.lastAuditResult.PreviousRootIndex)
 	require.Equal(t, 1., ms.mc.lastAuditResult.CurrentRootIndex)

@@ -98,10 +98,14 @@ func (mc MetricsCollection) UpdateAuditResult(
 		currRootIndex = -2.
 	}
 	if prevRoot != nil {
-		prevRootIndex = float64(prevRoot.GetIndex())
+		prevRootIndex = float64(prevRoot.Payload.GetIndex())
+	}else{
+		prevRoot = &schema.Root{Payload: &schema.RootIndex{}}
 	}
 	if currRoot != nil {
-		currRootIndex = float64(currRoot.GetIndex())
+		currRootIndex = float64(currRoot.Payload.GetIndex())
+	}else{
+		currRoot = &schema.Root{Payload: &schema.RootIndex{}}
 	}
 
 	mc.AuditResultPerServer.
@@ -121,9 +125,9 @@ func (mc MetricsCollection) UpdateAuditResult(
 	mc.lastAuditResult.HasError = withError
 	mc.lastAuditResult.ConsistencyCheckResult = checked && !withError && result
 	mc.lastAuditResult.PreviousRootIndex = prevRootIndex
-	mc.lastAuditResult.PreviousRoot = fmt.Sprintf("%x", prevRoot.GetRoot())
+	mc.lastAuditResult.PreviousRoot = fmt.Sprintf("%x", prevRoot.Payload.GetRoot())
 	mc.lastAuditResult.CurrentRootIndex = currRootIndex
-	mc.lastAuditResult.CurrentRoot = fmt.Sprintf("%x", currRoot.GetRoot())
+	mc.lastAuditResult.CurrentRoot = fmt.Sprintf("%x", currRoot.Payload.GetRoot())
 	mc.lastAuditResult.RunAt = time.Now()
 }
 

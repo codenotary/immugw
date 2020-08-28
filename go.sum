@@ -30,9 +30,12 @@ github.com/cespare/xxhash/v2 v2.1.1 h1:6MnRN8NT7+YBpUIWxHtefFZOKTAPgGjpQSxqLNn0+
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
+github.com/codenotary/immudb v0.0.0-20200828160421-5b99a6cdadec h1:0A/dVigw3iWZwUM8Q0Ub7ed2KoKIn0WEePTxflB/Euw=
+github.com/codenotary/immudb v0.0.0-20200828160421-5b99a6cdadec/go.mod h1:Vo0TWoEDza4JC/hXZBzPZ23Zd0kJ5Km3qzzZszGtsEQ=
 github.com/codenotary/immudb v0.7.1 h1:/5R6u5unYmhhZ+TTwIBg+y5u71Os4ZvHRTB+1ATReWQ=
 github.com/codenotary/immudb v0.7.1/go.mod h1:CxQ0pzmSzIEzETCq3NIjRwBxHKr5na146co4cleUOxE=
 github.com/codenotary/immugw v0.0.0-20200825105546-b0cdc5e80b2a/go.mod h1:UQiXAxQaYBLMFpNj7XWt6yxOKurmXIxGzdgEp+BqK0c=
+github.com/codenotary/immugw v0.0.0-20200825141010-b6326c81edf2/go.mod h1:UQiXAxQaYBLMFpNj7XWt6yxOKurmXIxGzdgEp+BqK0c=
 github.com/codenotary/merkletree v0.1.2-0.20200720105344-68d95395a656 h1:Rp8hZs7t0fNLlfLj9PzEmW/W7X+nSp0vpu5CB0ba0jM=
 github.com/codenotary/merkletree v0.1.2-0.20200720105344-68d95395a656/go.mod h1:RkIGSuQ3nHZbE0rH21aYxyqlrI/2eICNOOIanDbzZPg=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
