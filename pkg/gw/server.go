@@ -97,6 +97,8 @@ func (s *ImmuGwServer) Start() error {
 			s.CliOptions.DialOptions,
 			s.Options.AuditUsername,
 			s.Options.AuditPassword,
+			s.Options.AuditSignature,
+			*ic.GetServiceClient(),
 			cache.NewHistoryFileCache(filepath.Join(s.CliOptions.Dir, "auditor")),
 			s.MetricServer.mc.UpdateAuditResult,
 			s.Logger)

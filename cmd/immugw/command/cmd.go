@@ -65,6 +65,7 @@ Environment variables:
   IMMUGW_AUDIT_INTERVAL=5m
   IMMUGW_AUDIT_USERNAME=immugwauditor
   IMMUGW_AUDIT_PASSWORD=
+  IMMUGW_AUDIT_SIGNATURE=ignore
   IMMUGW_PKEY=./tools/mtls/4_client/private/localhost.key.pem
   IMMUGW_CERTIFICATE=./tools/mtls/4_client/certs/localhost.cert.pem
   IMMUGW_CLIENTCAS=./tools/mtls/2_intermediate/certs/ca-chain.cert.pem`,
@@ -154,6 +155,7 @@ func parseOptions(cmd *cobra.Command) (options gw.Options, err error) {
 	auditInterval := viper.GetDuration("audit-interval")
 	auditUsername := viper.GetString("audit-username")
 	auditPassword := viper.GetString("audit-password")
+	auditSignature := viper.GetString("audit-signature")
 	pidfile, err := c.ResolvePath(viper.GetString("pidfile"), true)
 	if err != nil {
 		return options, err
@@ -188,6 +190,7 @@ func parseOptions(cmd *cobra.Command) (options gw.Options, err error) {
 		WithAuditInterval(auditInterval).
 		WithAuditUsername(auditUsername).
 		WithAuditPassword(auditPassword).
+		WithAuditSignature(auditSignature).
 		WithPidfile(pidfile).
 		WithLogfile(logfile).
 		WithMTLs(mtls).
@@ -214,6 +217,7 @@ func (cl *Commandline) setupFlags(cmd *cobra.Command, options gw.Options, mtlsOp
 	cmd.Flags().Duration("audit-interval", options.AuditInterval, "interval at which audit should run")
 	cmd.Flags().String("audit-username", options.AuditUsername, "immudb username used to login during audit")
 	cmd.Flags().String("audit-password", options.AuditPassword, "immudb password used to login during audit; can be plain-text or base64 encoded (must be prefixed with 'enc:' if it is encoded)")
+	cmd.Flags().String("audit-signature", "", "audit signature mode. ignore|validate. If 'ignore' is set auditor doesn't check for the root server signature. If 'validate' is set auditor verify that the root is signed properly by immudb server. Default value is 'ignore'")
 	cmd.Flags().String("pidfile", options.Pidfile, "pid path with filename. E.g. /var/run/immugw.pid")
 	cmd.Flags().String("logfile", options.Logfile, "log path with filename. E.g. /tmp/immugw/immugw.log")
 	cmd.Flags().BoolP("mtls", "m", options.MTLs, "enable mutual tls")
@@ -234,6 +238,7 @@ func setupDefaults(options gw.Options, mtlsOptions client.MTLsOptions) {
 	viper.SetDefault("audit-interval", options.AuditInterval)
 	viper.SetDefault("audit-username", options.AuditUsername)
 	viper.SetDefault("audit-password", options.AuditPassword)
+	viper.SetDefault("audit-signature", options.AuditSignature)
 	viper.SetDefault("pidfile", options.Pidfile)
 	viper.SetDefault("logfile", options.Logfile)
 	viper.SetDefault("mtls", options.MTLs)

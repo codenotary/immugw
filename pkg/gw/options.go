@@ -36,6 +36,7 @@ type Options struct {
 	AuditInterval time.Duration
 	AuditUsername string
 	AuditPassword string `json:"-"`
+	AuditSignature string
 	Detached      bool
 	MTLs          bool
 	MTLsOptions   client.MTLsOptions
@@ -57,6 +58,7 @@ func DefaultOptions() Options {
 		AuditInterval: 5 * time.Minute,
 		AuditUsername: "immugwauditor",
 		AuditPassword: "",
+		AuditSignature: "ignore",
 		Detached:      false,
 		MTLs:          false,
 		Config:        "configs/immugw.toml",
@@ -115,9 +117,15 @@ func (o Options) WithAuditUsername(auditUsername string) Options {
 	return o
 }
 
-// WithAuditPassword sets AuditPasswordauditUsername
+// WithAuditPassword sets AuditPassword
 func (o Options) WithAuditPassword(auditPassword string) Options {
 	o.AuditPassword = auditPassword
+	return o
+}
+
+// WithAuditSignature sets AuditSignature
+func (o Options) WithAuditSignature(auditSignature string) Options {
+	o.AuditSignature = auditSignature
 	return o
 }
 

@@ -13,5 +13,3 @@ require (
 	github.com/takama/daemon v0.12.0
 	google.golang.org/grpc v1.29.1
 )
-
-replace github.com/codenotary/immudb v0.7.1 => github.com/codenotary/immudb v0.0.0-20200828160421-5b99a6cdadec
