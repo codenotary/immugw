@@ -21,6 +21,7 @@ import (
 	c "github.com/codenotary/immudb/cmd/helper"
 	"github.com/codenotary/immudb/cmd/version"
 	"github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immugw/cmd/immugw/command/service"
 	"github.com/codenotary/immugw/pkg/gw"
 	"github.com/codenotary/immudb/pkg/logger"
 	"github.com/spf13/cobra"
@@ -83,6 +84,9 @@ Environment variables:
 	cmd.AddCommand(man.Generate(cmd, "immugw", "./cmd/docs/man/immugw"))
 
 	cmd.AddCommand(version.VersionCmd())
+
+	scl := service.NewCommandLine()
+	scl.Register(cmd)
 
 	return cmd, nil
 }
@@ -212,7 +216,7 @@ func (cl *Commandline) setupFlags(cmd *cobra.Command, options gw.Options, mtlsOp
 	cmd.Flags().StringP("address", "a", options.Address, "immugw host address")
 	cmd.Flags().IntP("immudb-port", "j", options.ImmudbPort, "immudb port number")
 	cmd.Flags().StringP("immudb-address", "k", options.ImmudbAddress, "immudb host address")
-	cmd.Flags().StringVar(&cl.config.CfgFn, "config", "", "config file (default path are configs or $HOME. Default filename is immugw.toml)")
+	cmd.PersistentFlags().StringVar(&cl.config.CfgFn, "config", "", "config file (default path are configs or $HOME. Default filename is immugw.toml)")
 	cmd.Flags().Bool("audit", options.Audit, "enable audit mode (continuously fetches latest root from server, checks consistency against a local root and saves the latest root locally)")
 	cmd.Flags().Duration("audit-interval", options.AuditInterval, "interval at which audit should run")
 	cmd.Flags().String("audit-username", options.AuditUsername, "immudb username used to login during audit")
