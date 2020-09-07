@@ -31,6 +31,7 @@ import (
 func TestCommandLine_ServiceImmugwInstall(t *testing.T) {
 	cmd := &cobra.Command{}
 	tr := &clienttest.TerminalReaderMock{}
+	tr.Responses = []string{"y"}
 	cld := commandline{helper.Config{}, servicetest.Sservicemock{}, tr}
 
 	cld.Service(cmd)
