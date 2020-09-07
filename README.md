@@ -36,9 +36,9 @@ make all
 # run immugw in the foreground
 ./immugw
 ```
-##### Run immugw as a service (using immuadmin)
+##### Run immugw as a service
 
-Please make sure to build or download the immugw and immuadmin component and save them in the same work directory when installing the service.
+Service installation and management are supported on Linux, Windows, OSX and FreeBSD operating systems.
 
 ```
 # install immugw service
@@ -58,17 +58,29 @@ The linux service is using the following defaults:
 
 | File or configuration   | location                   |
 | ----------------------- | -------------------------- |
-| all configuration files | /etc/immudb                |
-| pid file                | /var/lib/immudb/immugw.pid |
-| log files               | /var/log/immudb            |
+| executable              | /usr/sbin/immugw           |
+| all configuration files | /etc/immugw                |
+| pid file                | /var/lib/immugw/immugw.pid |
+| log files               | /var/log/immugw            |
 
 The FreeBSD service is using the following defaults:
 
 | File or configuration   | location            |
 | ----------------------- | ------------------- |
-| all configuration files | /etc/immudb         |
+| executable              | /usr/sbin/immugw    |
+| all configuration files | /etc/immugw         |
 | pid file                | /var/run/immugw.pid |
-| log files               | /var/log/immudb     |
+| log files               | /var/log/immugw     |
+
+The Windows service is using the following defaults:
+
+| File or configuration   | location                             |
+| ----------------------- | ------------------------------------
+| executable              | Program Files\Immugw\immugw.exe      |
+| configuration file      | ProgramData\Immugw\config\immugw.toml|
+| all data files          | ProgramData\Immugw\                  |
+| pid file                | ProgramData\Immugw\config\immugw.pid |
+| log file                | ProgramData\Immugw\config\immugw.log |
 
 
 
