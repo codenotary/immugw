@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/codenotary/immudb/pkg/client/rootservice"
 	"google.golang.org/grpc/metadata"
 	"log"
 	"net"
@@ -53,10 +54,12 @@ func newClient(bufDialer func(context.Context, string) (net.Conn, error)) client
 	immuclient.WithClientConn(clientConn)
 	serviceClient := schema.NewImmuServiceClient(clientConn)
 	immuclient.WithServiceClient(serviceClient)
-	rootService := client.NewRootService(
-		serviceClient,
-		cache.NewInMemoryCache(),
-		logger.NewSimpleLogger("handlers_test", os.Stdout))
+
+	immudbRootProvider := rootservice.NewImmudbRootProvider(serviceClient)
+	immudbUUIDProvider := rootservice.NewImmudbUUIDProvider(serviceClient)
+
+	rootService, _  := rootservice.NewRootService(cache.NewInMemoryCache(), logger.NewSimpleLogger("handlers_test", os.Stdout), immudbRootProvider, immudbUUIDProvider)
+
 	immuclient.WithRootService(rootService)
 	return immuclient
 }

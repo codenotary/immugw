@@ -19,6 +19,7 @@ package gw
 import (
 	"context"
 	"fmt"
+	"github.com/codenotary/immudb/pkg/client/rootservice"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,8 +33,8 @@ import (
 	"github.com/codenotary/immudb/pkg/client/auditor"
 	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/immuos"
-	"github.com/codenotary/immugw/pkg/json"
 	"github.com/codenotary/immudb/pkg/server"
+	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/rs/cors"
 )
@@ -90,6 +91,7 @@ func (s *ImmuGwServer) Start() error {
 		}
 	}
 
+	UUIDProvider := rootservice.NewImmudbUUIDProvider(*ic.GetServiceClient())
 	if s.Options.Audit {
 		defaultAuditor, err := auditor.DefaultAuditor(
 			s.Options.AuditInterval,
@@ -98,7 +100,9 @@ func (s *ImmuGwServer) Start() error {
 			s.Options.AuditUsername,
 			s.Options.AuditPassword,
 			s.Options.AuditSignature,
+			auditor.TamperingAlertConfig{},
 			*ic.GetServiceClient(),
+			UUIDProvider,
 			cache.NewHistoryFileCache(filepath.Join(s.CliOptions.Dir, "auditor")),
 			s.MetricServer.mc.UpdateAuditResult,
 			s.Logger)
