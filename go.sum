@@ -30,14 +30,8 @@ github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDk
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
 github.com/codenotary/daemon v0.0.0-20200507161650-3d4bcb5230f4 h1:5mhTmqO2f6QXPlIAGCEtCYR2MHNDLVkwaGWiSbffeQU=
 github.com/codenotary/daemon v0.0.0-20200507161650-3d4bcb5230f4/go.mod h1:PFDPquCi+3LI5PpAKS/8LvJBHTfkdsEXfGtANGx9hH4=
-github.com/codenotary/immudb v0.0.0-20200904160844-d762fd4d9cec h1:zW/3lD7NtbizI9O8oIELdhkxgmgIYoYaOKXh+y5Pt8E=
-github.com/codenotary/immudb v0.0.0-20200904160844-d762fd4d9cec/go.mod h1:eplq5VZWdNCP4pRZTGVE9ellhnfd37SXAEeUfeEtw+U=
-github.com/codenotary/immudb v0.0.0-20200907085419-feee150a05ad h1:GNP9NDHZ8JM/wLLdKLzv+OWYFp4u4Df8mGnc9WfNv6k=
-github.com/codenotary/immudb v0.0.0-20200907085419-feee150a05ad/go.mod h1:eplq5VZWdNCP4pRZTGVE9ellhnfd37SXAEeUfeEtw+U=
-github.com/codenotary/immudb v0.0.0-20200907095510-b907fa0d516b h1:osnrE27yysiNpRtd7UNyqqzBbxhhMpMlRLXcqmmeDlo=
-github.com/codenotary/immudb v0.0.0-20200907095510-b907fa0d516b/go.mod h1:eplq5VZWdNCP4pRZTGVE9ellhnfd37SXAEeUfeEtw+U=
-github.com/codenotary/immudb v0.0.0-20200907100424-04f687fa1754 h1:9ZUAa9qyxCuJh/F7D2phvzNtApZoGPLqwDmKR1eElLM=
-github.com/codenotary/immudb v0.0.0-20200907100424-04f687fa1754/go.mod h1:eplq5VZWdNCP4pRZTGVE9ellhnfd37SXAEeUfeEtw+U=
+github.com/codenotary/immudb v0.8.1-0.20201106152514-888ed37bf6cc h1:TvFPA8kw0SeCD5gnJMbGBS3qMwiq8QA++w/3WNGLoaI=
+github.com/codenotary/immudb v0.8.1-0.20201106152514-888ed37bf6cc/go.mod h1:otCztOd0EipuKMyYkzcWnWGRQZT5Amr4+BkDFD4i1Lg=
 github.com/codenotary/merkletree v0.1.2-0.20200720105344-68d95395a656 h1:Rp8hZs7t0fNLlfLj9PzEmW/W7X+nSp0vpu5CB0ba0jM=
 github.com/codenotary/merkletree v0.1.2-0.20200720105344-68d95395a656/go.mod h1:RkIGSuQ3nHZbE0rH21aYxyqlrI/2eICNOOIanDbzZPg=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
@@ -232,8 +226,6 @@ github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/subosito/gotenv v1.2.0 h1:Slr1R9HxAlEKefgq5jn9U+DnETlIUa6HfgEzj0g5d7s=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
-github.com/takama/daemon v0.12.0 h1:aiDFyglfEFetc2gMd+TBKSVV4y7/gRQzMdF2QD++ZuA=
-github.com/takama/daemon v0.12.0/go.mod h1:PFDPquCi+3LI5PpAKS/8LvJBHTfkdsEXfGtANGx9hH4=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=

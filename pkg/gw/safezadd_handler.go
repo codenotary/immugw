@@ -78,7 +78,7 @@ func (h *safeZAddHandler) SafeZAdd(w http.ResponseWriter, req *http.Request, pat
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "incorrect JSON payload"))
 		return
 	}
-	msg, err := h.client.SafeZAdd(rctx, protoReq.Zopts.Set, protoReq.Zopts.Score, protoReq.Zopts.Key)
+	msg, err := h.client.SafeZAdd(rctx, protoReq.Zopts.Set, protoReq.Zopts.Score.Score, protoReq.Zopts.Key)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return

@@ -71,7 +71,7 @@ func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) [
 	validSet := base64.StdEncoding.EncodeToString([]byte("safeZAddSet1"))
 	validKey := base64.StdEncoding.EncodeToString([]byte("setKey1"))
 	validPayload := fmt.Sprintf(
-		"{\"zopts\": {\"set\": \"%s\", \"score\": %.1f, \"key\": \"%s\"}}",
+		"{\"zopts\": {\"set\": \"%s\", \"score\": { \"score\":  %.1f }, \"key\": \"%s\"}}",
 		validSet,
 		1.0,
 		validKey,
@@ -91,7 +91,7 @@ func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) [
 			"Sending request with non-existent key",
 			szh,
 			fmt.Sprintf(
-				"{\"zopts\": {\"set\": \"%s\", \"score\": %.1f, \"key\": \"%s\"}}",
+				"{\"zopts\": {\"set\": \"%s\", \"score\": { \"score\":  %.1f }, \"key\": \"%s\"}}",
 				validSet,
 				1.0,
 				base64.StdEncoding.EncodeToString([]byte("safeZAddUnknownKey")),
@@ -106,7 +106,7 @@ func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) [
 			"Sending request with incorrect JSON field",
 			szh,
 			fmt.Sprintf(
-				"{\"zoptsi\": {\"set\": \"%s\", \"score\": %.1f, \"key\": \"%s\"}}",
+				"{\"zoptsi\": {\"set\": \"%s\", \"score\": { \"score\":  %.1f }, \"key\": \"%s\"}}",
 				validSet,
 				1.0,
 				validKey,
@@ -121,7 +121,7 @@ func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) [
 			"Missing key field",
 			szh,
 			fmt.Sprintf(
-				"{\"zopts\": {\"set\": \"%s\", \"score\": %.1f}}",
+				"{\"zopts\": {\"set\": \"%s\", \"score\": { \"score\":  %.1f }}}",
 				validSet,
 				1.0,
 			),
@@ -135,7 +135,7 @@ func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) [
 			"Send plain text instead of base64 encoded",
 			szh,
 			fmt.Sprintf(
-				"{\"zopts\": {\"set\": \"%s\", \"score\": %.1f, \"key\": \"setKey1\"}}",
+				"{\"zopts\": {\"set\": \"%s\", \"score\": { \"score\":  %.1f }, \"key\": \"setKey1\"}}",
 				validSet,
 				1.0,
 			),

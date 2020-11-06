@@ -105,6 +105,7 @@ func (cl *Commandline) Immugw(immugwServer gw.ImmuGw) func(*cobra.Command, []str
 			HealthCheckRetries: 1,
 			MTLs:               options.MTLs,
 			MTLsOptions:        options.MTLsOptions,
+			MaxRecvMsgSize:     4 * 1024 * 1024,
 			Auth:               true,
 			Config:             "",
 			DialOptions:        &[]grpc.DialOption{},
