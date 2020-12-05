@@ -181,7 +181,7 @@ docker build -t myown/immugw:latest -f Dockerfile .
 
 You can find the swagger schema here:
 
-https://github.com/codenotary/immudb/blob/master/pkg/api/schema/gw.schema.swagger.json
+https://github.com/codenotary/immudb/blob/master/pkg/api/schema/schema.swagger.json
 
 If you want to run the Swagger UI, simply run the following docker command after you cloned this repo:
 
