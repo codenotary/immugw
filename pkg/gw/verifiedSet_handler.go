@@ -30,21 +30,21 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// SafesetHandler ...
-type SafesetHandler interface {
-	Safeset(w http.ResponseWriter, req *http.Request, pathParams map[string]string)
+// VerifiedSetHandler ...
+type VerifiedSetHandler interface {
+	VerifiedSet(w http.ResponseWriter, req *http.Request, pathParams map[string]string)
 }
 
-type safesetHandler struct {
+type verifiedSetHandler struct {
 	mux     *runtime.ServeMux
 	client  client.ImmuClient
 	runtime Runtime
 	json    json.JSON
 }
 
-// NewSafesetHandler ...
-func NewSafesetHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) SafesetHandler {
-	return &safesetHandler{
+// NewVerifiedSetHandler ...
+func NewVerifiedSetHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) VerifiedSetHandler {
+	return &verifiedSetHandler{
 		mux:     mux,
 		client:  client,
 		runtime: rt,
@@ -52,7 +52,7 @@ func NewSafesetHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runti
 	}
 }
 
-func (h *safesetHandler) Safeset(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+func (h *verifiedSetHandler) VerifiedSet(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 	ctx, cancel := context.WithCancel(req.Context())
 	defer cancel()
 	inboundMarshaler, outboundMarshaler := h.runtime.MarshalerForRequest(h.mux, req)
@@ -63,7 +63,7 @@ func (h *safesetHandler) Safeset(w http.ResponseWriter, req *http.Request, pathP
 		return
 	}
 
-	var protoReq schema.SafeSetOptions
+	var protoReq schema.VerifiableSetRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -75,11 +75,17 @@ func (h *safesetHandler) Safeset(w http.ResponseWriter, req *http.Request, pathP
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
 		return
 	}
-	if protoReq.Kv == nil {
+	if protoReq.SetRequest.KVs == nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "incorrect JSON payload"))
 		return
 	}
-	msg, err := h.client.SafeSet(rctx, protoReq.Kv.Key, protoReq.Kv.Value)
+
+	if len(protoReq.SetRequest.KVs) > 1 {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "verifiedSet accept only one key value pair"))
+		return
+	}
+
+	msg, err := h.client.VerifiedSet(rctx, protoReq.SetRequest.KVs[0].Key, protoReq.SetRequest.KVs[0].Value)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return

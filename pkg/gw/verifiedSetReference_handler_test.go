@@ -15,11 +15,13 @@ limitations under the License.
 */
 package gw
 
+/*
 import (
 	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/codenotary/immudb/pkg/api/schema"
 	"net/http"
 	"testing"
 
@@ -31,13 +33,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func testSafeZAddHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
-	prefixPattern := "SafeZAddHandler - Test case: %s"
+func testSafeReferenceHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
+	prefixPattern := "SafeReferenceHandler - Test case: %s"
 	method := "POST"
-	path := "/v1/immurestproxy/safe/zadd"
-	for _, tc := range safeZAddHandlerTestCases(mux, ic) {
+	path := "/v1/immurestproxy/safe/reference"
+	for _, tc := range safeReferenceHandlerTestCases(mux, ic) {
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-			tc.safeZAddHandler.SafeZAdd(res, req, nil)
+			tc.safeReferenceHandler.SafeReference(res, req, nil)
 		}
 		err := testHandler(
 			t,
@@ -52,35 +54,33 @@ func testSafeZAddHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.Immu
 	}
 }
 
-type safeZAddHandlerTestCase struct {
-	name            string
-	safeZAddHandler SafeZAddHandler
-	payload         string
-	testFunc        func(*testing.T, string, int, map[string]interface{})
+type safeReferenceHandlerTestCase struct {
+	name                 string
+	safeReferenceHandler SafeReferenceHandler
+	payload              string
+	testFunc             func(*testing.T, string, int, map[string]interface{})
 }
 
-func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []safeZAddHandlerTestCase {
+func safeReferenceHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []safeReferenceHandlerTestCase {
 	rt := newDefaultRuntime()
 	json := json.DefaultJSON()
-	szh := NewSafeZAddHandler(mux, ic, rt, json)
+	srh := NewSafeReferenceHandler(mux, ic, rt, json)
 	icd := client.DefaultClient()
-	safeZAddWErr := func(context.Context, []byte, float64, []byte) (*client.VerifiedIndex, error) {
-		return nil, errors.New("safezadd error")
+	safeReferenceWErr := func(context.Context, []byte, []byte, uint64) (*schema.TxMetadata, error) {
+		return nil, errors.New("safereference error")
 	}
-
-	validSet := base64.StdEncoding.EncodeToString([]byte("safeZAddSet1"))
+	validRefKey := base64.StdEncoding.EncodeToString([]byte("safeReferenceKey1"))
 	validKey := base64.StdEncoding.EncodeToString([]byte("setKey1"))
 	validPayload := fmt.Sprintf(
-		"{\"zopts\": {\"set\": \"%s\", \"score\": { \"score\":  %.1f }, \"key\": \"%s\"}}",
-		validSet,
-		1.0,
+		"{\"ro\": {\"reference\": \"%s\", \"key\": \"%s\"}}",
+		validRefKey,
 		validKey,
 	)
 
-	return []safeZAddHandlerTestCase{
+	return []safeReferenceHandlerTestCase{
 		{
 			"Sending correct request",
-			szh,
+			srh,
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusOK, status)
@@ -88,13 +88,12 @@ func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) [
 			},
 		},
 		{
-			"Sending request with non-existent key",
-			szh,
+			"Sending correct request with non-existent key",
+			srh,
 			fmt.Sprintf(
-				"{\"zopts\": {\"set\": \"%s\", \"score\": { \"score\":  %.1f }, \"key\": \"%s\"}}",
-				validSet,
-				1.0,
-				base64.StdEncoding.EncodeToString([]byte("safeZAddUnknownKey")),
+				"{\"ro\": {\"reference\": \"%s\", \"key\": \"%s\"}}",
+				validRefKey,
+				base64.StdEncoding.EncodeToString([]byte("safeReferenceUnknownKey")),
 			),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusNotFound, status)
@@ -103,12 +102,11 @@ func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) [
 			},
 		},
 		{
-			"Sending request with incorrect JSON field",
-			szh,
+			"Sending incorrect json field",
+			srh,
 			fmt.Sprintf(
-				"{\"zoptsi\": {\"set\": \"%s\", \"score\": { \"score\":  %.1f }, \"key\": \"%s\"}}",
-				validSet,
-				1.0,
+				"{\"data\": {\"reference\": \"%s\", \"key\": \"%s\"}}",
+				validRefKey,
 				validKey,
 			),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
@@ -118,12 +116,11 @@ func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) [
 			},
 		},
 		{
-			"Missing key field",
-			szh,
+			"Missing Key field",
+			srh,
 			fmt.Sprintf(
-				"{\"zopts\": {\"set\": \"%s\", \"score\": { \"score\":  %.1f }}}",
-				validSet,
-				1.0,
+				"{\"ro\": {\"reference\": \"%s\"}}",
+				validRefKey,
 			),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
@@ -132,22 +129,21 @@ func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) [
 			},
 		},
 		{
-			"Send plain text instead of base64 encoded",
-			szh,
+			"Sending plain text instead of base64 encoded",
+			srh,
 			fmt.Sprintf(
-				"{\"zopts\": {\"set\": \"%s\", \"score\": { \"score\":  %.1f }, \"key\": \"setKey1\"}}",
-				validSet,
-				1.0,
+				"{\"ro\": {\"reference\": \"safeReferenceKey1\", \"key\": \"%s\"}}",
+				validKey,
 			),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
 				requireResponseFieldsEqual(
-					t, testCase, map[string]interface{}{"error": "illegal base64 data at input byte 4"}, body)
+					t, testCase, map[string]interface{}{"error": "illegal base64 data at input byte 16"}, body)
 			},
 		},
 		{
 			"AnnotateContext error",
-			NewSafeZAddHandler(mux, ic, newTestRuntimeWithAnnotateContextErr(), json),
+			NewSafeReferenceHandler(mux, ic, newTestRuntimeWithAnnotateContextErr(), json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -156,18 +152,18 @@ func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) [
 			},
 		},
 		{
-			"SafeZAdd error",
-			NewSafeZAddHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, SafeZAddF: safeZAddWErr}, rt, json),
+			"SafeReference error",
+			NewSafeReferenceHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, VerifiedSetReferenceF: safeReferenceWErr}, rt, json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
 				requireResponseFieldsEqual(
-					t, testCase, map[string]interface{}{"error": "safezadd error"}, body)
+					t, testCase, map[string]interface{}{"error": "safereference error"}, body)
 			},
 		},
 		{
 			"JSON marshal error",
-			NewSafeZAddHandler(mux, ic, rt, newTestJSONWithMarshalErr()),
+			NewSafeReferenceHandler(mux, ic, rt, newTestJSONWithMarshalErr()),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -177,3 +173,4 @@ func safeZAddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) [
 		},
 	}
 }
+*/

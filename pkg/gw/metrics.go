@@ -19,6 +19,7 @@ package gw
 import (
 	"expvar"
 	"fmt"
+	"github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"sync"
@@ -26,9 +27,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
-	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immugw/pkg/json"
 	"github.com/codenotary/immudb/pkg/logger"
+	"github.com/codenotary/immugw/pkg/json"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -80,8 +80,8 @@ func (mc MetricsCollection) UpdateAuditResult(
 	checked bool,
 	withError bool,
 	result bool,
-	prevRoot *schema.Root,
-	currRoot *schema.Root,
+	prevRoot *schema.ImmutableState,
+	currRoot *schema.ImmutableState,
 ) {
 	var r float64
 	if checked && result {
@@ -98,14 +98,14 @@ func (mc MetricsCollection) UpdateAuditResult(
 		currRootIndex = -2.
 	}
 	if prevRoot != nil {
-		prevRootIndex = float64(prevRoot.Payload.GetIndex())
-	}else{
-		prevRoot = &schema.Root{Payload: &schema.RootIndex{}}
+		prevRootIndex = float64(prevRoot.TxId)
+	} else {
+		prevRoot = &schema.ImmutableState{}
 	}
 	if currRoot != nil {
-		currRootIndex = float64(currRoot.Payload.GetIndex())
-	}else{
-		currRoot = &schema.Root{Payload: &schema.RootIndex{}}
+		currRootIndex = float64(currRoot.TxId)
+	} else {
+		currRoot = &schema.ImmutableState{}
 	}
 
 	mc.AuditResultPerServer.
@@ -125,9 +125,9 @@ func (mc MetricsCollection) UpdateAuditResult(
 	mc.lastAuditResult.HasError = withError
 	mc.lastAuditResult.ConsistencyCheckResult = checked && !withError && result
 	mc.lastAuditResult.PreviousRootIndex = prevRootIndex
-	mc.lastAuditResult.PreviousRoot = fmt.Sprintf("%x", prevRoot.Payload.GetRoot())
+	mc.lastAuditResult.PreviousRoot = fmt.Sprintf("%x", prevRoot.TxHash)
 	mc.lastAuditResult.CurrentRootIndex = currRootIndex
-	mc.lastAuditResult.CurrentRoot = fmt.Sprintf("%x", currRoot.Payload.GetRoot())
+	mc.lastAuditResult.CurrentRoot = fmt.Sprintf("%x", currRoot.TxHash)
 	mc.lastAuditResult.RunAt = time.Now()
 }
 

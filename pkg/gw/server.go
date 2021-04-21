@@ -19,7 +19,10 @@ package gw
 import (
 	"context"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/client/rootservice"
+	"github.com/codenotary/immudb/pkg/client/auditor"
+	"github.com/codenotary/immudb/pkg/client/cache"
+	"github.com/codenotary/immudb/pkg/client/state"
+	"github.com/codenotary/immugw/pkg/api"
 	"net/http"
 	"os"
 	"os/signal"
@@ -30,8 +33,6 @@ import (
 
 	"github.com/codenotary/immudb/pkg/api/schema"
 	immuclient "github.com/codenotary/immudb/pkg/client"
-	"github.com/codenotary/immudb/pkg/client/auditor"
-	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/immuos"
 	"github.com/codenotary/immudb/pkg/server"
 	"github.com/codenotary/immugw/pkg/json"
@@ -52,7 +53,7 @@ func (s *ImmuGwServer) Start() error {
 		s.Logger.Errorf("unable to instantiate client: %s", err)
 		return err
 	}
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(runtime.WithProtoErrorHandler(runtime.DefaultHTTPProtoErrorHandler))
 
 	handler := cors.Default().Handler(mux)
 
@@ -60,23 +61,24 @@ func (s *ImmuGwServer) Start() error {
 	json := json.DefaultJSON()
 
 	sh := NewSetHandler(mux, ic, rt, json)
-	ssh := NewSafesetHandler(mux, ic, rt, json)
-	sgh := NewSafegetHandler(mux, ic, rt, json)
+	ssh := NewVerifiedSetHandler(mux, ic, rt, json)
+	sgh := NewVerifiedGetHandler(mux, ic, rt, json)
 	hh := NewHistoryHandler(mux, ic, rt, json)
 	sr := NewSafeReferenceHandler(mux, ic, rt, json)
-	sza := NewSafeZAddHandler(mux, ic, rt, json)
+	sza := NewVerifiedZaddHandler(mux, ic, rt, json)
 	udb := NewUseDatabaseHandler(mux, ic, rt, json)
+	tx := NewVerifiedTxByIdHandler(mux, ic, rt, json)
 
 	mux.Handle(http.MethodPost, schema.Pattern_ImmuService_Set_0(), sh.Set)
-	mux.Handle(http.MethodPost, schema.Pattern_ImmuService_SafeSet_0(), ssh.Safeset)
-	mux.Handle(http.MethodPost, schema.Pattern_ImmuService_SafeGet_0(), sgh.Safeget)
-	mux.Handle(http.MethodGet, schema.Pattern_ImmuService_History_0(), hh.History)
-	mux.Handle(http.MethodPost, schema.Pattern_ImmuService_SafeReference_0(), sr.SafeReference)
-	mux.Handle(http.MethodPost, schema.Pattern_ImmuService_SafeZAdd_0(), sza.SafeZAdd)
-	mux.Handle(http.MethodPost, schema.Pattern_ImmuService_SafeZAdd_0(), sza.SafeZAdd)
+	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedSet_0(), ssh.VerifiedSet)
+	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedGet_0(), sgh.VerifiedGet)
+	mux.Handle(http.MethodPost, schema.Pattern_ImmuService_History_0(), hh.History)
+	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedSetReference_0(), sr.SafeReference)
+	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedZAdd_0(), sza.VerifiedZadd)
 	mux.Handle(http.MethodGet, schema.Pattern_ImmuService_UseDatabase_0(), udb.UseDatabase)
+	mux.Handle(http.MethodGet, api.Pattern_ImmuService_VerifiedTxById_0(), tx.VerifiedTxById)
 
-	err = schema.RegisterImmuServiceHandlerClient(ctx, mux, *ic.GetServiceClient())
+	err = schema.RegisterImmuServiceHandlerClient(ctx, mux, ic.GetServiceClient())
 	if err != nil {
 		s.Logger.Errorf("unable to register client handlers: %s", err)
 		return err
@@ -91,7 +93,6 @@ func (s *ImmuGwServer) Start() error {
 		}
 	}
 
-	UUIDProvider := rootservice.NewImmudbUUIDProvider(*ic.GetServiceClient())
 	if s.Options.Audit {
 		defaultAuditor, err := auditor.DefaultAuditor(
 			s.Options.AuditInterval,
@@ -99,10 +100,11 @@ func (s *ImmuGwServer) Start() error {
 			s.CliOptions.DialOptions,
 			s.Options.AuditUsername,
 			s.Options.AuditPassword,
-			s.Options.AuditSignature,
-			auditor.TamperingAlertConfig{},
-			*ic.GetServiceClient(),
-			UUIDProvider,
+			nil,
+			nil,
+			auditor.AuditNotificationConfig{},
+			ic.GetServiceClient(),
+			state.NewUUIDProvider(ic.GetServiceClient()),
 			cache.NewHistoryFileCache(filepath.Join(s.CliOptions.Dir, "auditor")),
 			s.MetricServer.mc.UpdateAuditResult,
 			s.Logger)

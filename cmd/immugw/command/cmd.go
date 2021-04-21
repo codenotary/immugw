@@ -21,9 +21,9 @@ import (
 	c "github.com/codenotary/immudb/cmd/helper"
 	"github.com/codenotary/immudb/cmd/version"
 	"github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immudb/pkg/logger"
 	"github.com/codenotary/immugw/cmd/immugw/command/service"
 	"github.com/codenotary/immugw/pkg/gw"
-	"github.com/codenotary/immudb/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	daem "github.com/takama/daemon"
@@ -98,18 +98,17 @@ func (cl *Commandline) Immugw(immugwServer gw.ImmuGw) func(*cobra.Command, []str
 		if options, err = parseOptions(cmd); err != nil {
 			return err
 		}
-		cliOpts := client.Options{
-			Dir:                options.Dir,
-			Address:            options.ImmudbAddress,
-			Port:               options.ImmudbPort,
-			HealthCheckRetries: 1,
-			MTLs:               options.MTLs,
-			MTLsOptions:        options.MTLsOptions,
-			MaxRecvMsgSize:     4 * 1024 * 1024,
-			Auth:               true,
-			Config:             "",
-			DialOptions:        &[]grpc.DialOption{},
-		}
+		cliOpts := client.DefaultOptions().
+			WithDir(options.Dir).
+			WithPort(options.ImmudbPort).
+			WithAddress(options.ImmudbAddress).
+			WithHealthCheckRetries(1).
+			WithMTLs(options.MTLs).
+			WithMTLsOptions(options.MTLsOptions).
+			WithMaxRecvMsgSize(4 * 1024 * 1024).
+			WithAuth(true).
+			WithConfig("").
+			WithDialOptions(&[]grpc.DialOption{})
 
 		immuGwServer := immugwServer.
 			WithOptions(options).WithCliOptions(*cliOpts.WithTokenService(client.NewTokenService().WithHds(client.NewHomedirService())))
