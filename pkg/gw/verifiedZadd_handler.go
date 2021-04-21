@@ -30,21 +30,21 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// SafeZAddHandler ...
-type SafeZAddHandler interface {
-	SafeZAdd(w http.ResponseWriter, req *http.Request, pathParams map[string]string)
+// VerifiedZaddHandler ...
+type VerifiedZaddHandler interface {
+	VerifiedZadd(w http.ResponseWriter, req *http.Request, pathParams map[string]string)
 }
 
-type safeZAddHandler struct {
+type verifiedZaddHandler struct {
 	mux     *runtime.ServeMux
 	client  client.ImmuClient
 	runtime Runtime
 	json    json.JSON
 }
 
-// NewSafeZAddHandler ...
-func NewSafeZAddHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) SafeZAddHandler {
-	return &safeZAddHandler{
+// NewVerifiedZaddHandler ...
+func NewVerifiedZaddHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) VerifiedZaddHandler {
+	return &verifiedZaddHandler{
 		mux:     mux,
 		client:  client,
 		runtime: rt,
@@ -52,7 +52,7 @@ func NewSafeZAddHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runt
 	}
 }
 
-func (h *safeZAddHandler) SafeZAdd(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+func (h *verifiedZaddHandler) VerifiedZadd(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 	ctx, cancel := context.WithCancel(req.Context())
 	defer cancel()
 	inboundMarshaler, outboundMarshaler := h.runtime.MarshalerForRequest(h.mux, req)
@@ -63,28 +63,27 @@ func (h *safeZAddHandler) SafeZAdd(w http.ResponseWriter, req *http.Request, pat
 		return
 	}
 
-	var protoReq schema.SafeZAddOptions
+	var protoReq schema.VerifiableZAddRequest
 	var metadata runtime.ServerMetadata
 	newReader, berr := utilities.IOReaderFactory(req.Body)
 	if berr != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", berr))
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", berr))
 		return
 	}
 	if err = inboundMarshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
 		return
 	}
-	if protoReq.Zopts == nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "incorrect JSON payload"))
+	if protoReq.ZAddRequest == nil {
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "incorrect JSON payload"))
 		return
 	}
-	msg, err := h.client.SafeZAdd(rctx, protoReq.Zopts.Set, protoReq.Zopts.Score.Score, protoReq.Zopts.Key)
-	if err != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
-		return
-	}
-
+	msg, err := h.client.VerifiedZAddAt(rctx, protoReq.ZAddRequest.Set, protoReq.ZAddRequest.Score, protoReq.ZAddRequest.Key, protoReq.ZAddRequest.AtTx)
 	ctx = h.runtime.NewServerMetadataContext(rctx, metadata)
+	if err != nil {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	newData, err := h.json.Marshal(msg)
 	if err != nil {

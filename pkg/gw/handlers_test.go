@@ -15,11 +15,12 @@ limitations under the License.
 */
 package gw
 
+/*
 import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/client/rootservice"
+	"github.com/codenotary/immudb/pkg/client/state"
 	"google.golang.org/grpc/metadata"
 	"log"
 	"net"
@@ -43,7 +44,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 )
-
+/*
 func newClient(bufDialer func(context.Context, string) (net.Conn, error)) client.ImmuClient {
 	dialOptions := []grpc.DialOption{
 		grpc.WithContextDialer(bufDialer), grpc.WithInsecure(),
@@ -55,12 +56,13 @@ func newClient(bufDialer func(context.Context, string) (net.Conn, error)) client
 	serviceClient := schema.NewImmuServiceClient(clientConn)
 	immuclient.WithServiceClient(serviceClient)
 
-	immudbRootProvider := rootservice.NewImmudbRootProvider(serviceClient)
-	immudbUUIDProvider := rootservice.NewImmudbUUIDProvider(serviceClient)
 
-	rootService, _  := rootservice.NewRootService(cache.NewInMemoryCache(), logger.NewSimpleLogger("handlers_test", os.Stdout), immudbRootProvider, immudbUUIDProvider)
+	stateProvider := state.NewStateProvider(serviceClient)
+	uuidProvider := state.NewUUIDProvider(serviceClient)
 
-	immuclient.WithRootService(rootService)
+	stateService, _  := state.NewStateService(cache.NewInMemoryCache(), logger.NewSimpleLogger("handlers_test", os.Stdout), stateProvider, uuidProvider)
+
+	immuclient.WithStateService(stateService)
 	return immuclient
 }
 
@@ -81,25 +83,36 @@ func newNtpMock() (timestamp.TsGenerator, error) {
 }
 
 func TestGw(t *testing.T) {
-	bs := servertest.NewBufconnServer(server.Options{}.WithAuth(false).WithInMemoryStore(true))
+	options := server.DefaultOptions().WithAuth(true)
+	bs := servertest.NewBufconnServer(options)
+
 	bs.Start()
-	nm, _ := newNtpMock()
-	immuClient := newClient(bs.Dialer).WithTimestampService(client.NewTimestampService(nm))
-	require.NoError(t, immuClient.HealthCheck(context.Background()))
-	mux := runtime.NewServeMux()
+	defer bs.Stop()
+
+	defer os.RemoveAll(options.Dir)
+	defer os.Remove(".state-")
+
+	immuClient := newClient(bs.Dialer)
+	mux := runtime.NewServeMux(runtime.WithProtoErrorHandler(runtime.DefaultHTTPProtoErrorHandler))
 	testSafeSetHandler(t, mux, immuClient)
 	testSetHandler(t, mux, immuClient)
 	testSafeGetHandler(t, mux, immuClient)
 	testHistoryHandler(t, mux, immuClient)
 	testSafeReferenceHandler(t, mux, immuClient)
-	testSafeZAddHandler(t, mux, immuClient)
+	testVerifiedZaddHandler(t, mux, immuClient)
 }
 
 func TestAuthGw(t *testing.T) {
-	bs := servertest.NewBufconnServer(server.Options{}.WithAuth(true).WithInMemoryStore(true))
+	options := server.DefaultOptions().WithAuth(true)
+	bs := servertest.NewBufconnServer(options)
+
 	bs.Start()
-	nm, _ := newNtpMock()
-	immuClient := newClient(bs.Dialer).WithTimestampService(client.NewTimestampService(nm))
+	defer bs.Stop()
+
+	defer os.RemoveAll(options.Dir)
+	defer os.Remove(".state-")
+
+	immuClient := newClient(bs.Dialer)
 
 	ctx := context.Background()
 
@@ -236,3 +249,4 @@ func (pr *PasswordReader) Read(msg string) ([]byte, error) {
 	pr.callNumber++
 	return pass, nil
 }
+*/

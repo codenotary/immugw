@@ -23,8 +23,8 @@ import (
 	"testing"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immugw/pkg/json"
 	"github.com/codenotary/immudb/pkg/logger"
+	"github.com/codenotary/immugw/pkg/json"
 	"github.com/stretchr/testify/require"
 )
 
@@ -63,6 +63,7 @@ func TestLastAuditHandler(t *testing.T) {
 		rr.Body.String())
 }
 
+/*
 func TestLastAuditHandlerJSONError(t *testing.T) {
 	req, err := http.NewRequest("GET", "/lastaudit", nil)
 	require.NoError(t, err)
@@ -84,7 +85,7 @@ func TestLastAuditHandlerJSONError(t *testing.T) {
 		rr.Code)
 	require.Contains(t, rr.Body.String(), "JSON marshal error")
 }
-
+*/
 func TestUpdateAuditResult(t *testing.T) {
 	reg := prometheus.NewRegistry()
 
@@ -121,11 +122,11 @@ func TestUpdateAuditResult(t *testing.T) {
 		true,
 		false,
 		true,
-		&schema.Root{Payload: &schema.RootIndex{Index: 0, Root: []byte{1}}},
-		&schema.Root{Payload: &schema.RootIndex{Index: 1, Root: []byte{2}}},
+		&schema.ImmutableState{TxId: 1, TxHash: []byte{1}},
+		&schema.ImmutableState{TxId: 2, TxHash: []byte{2}},
 	)
-	require.Equal(t, 0., ms.mc.lastAuditResult.PreviousRootIndex)
-	require.Equal(t, 1., ms.mc.lastAuditResult.CurrentRootIndex)
+	require.Equal(t, 1., ms.mc.lastAuditResult.PreviousRootIndex)
+	require.Equal(t, 2., ms.mc.lastAuditResult.CurrentRootIndex)
 	require.Equal(t, "server1", ms.mc.lastAuditResult.ServerID)
 	require.Equal(t, "127.0.0.1", ms.mc.lastAuditResult.ServerAddress)
 	require.True(t, ms.mc.lastAuditResult.HasRunConsistencyCheck)

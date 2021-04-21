@@ -15,11 +15,13 @@ limitations under the License.
 */
 package gw
 
+/*
 import (
 	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/codenotary/immudb/pkg/api/schema"
 	"net/http"
 	"testing"
 
@@ -34,10 +36,10 @@ import (
 func testSafeSetHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
 	prefixPattern := "SafeSetHandler - Test case: %s"
 	method := "POST"
-	path := "/v1/immurestproxy/item/safe"
+	path := "/db/verified/set"
 	for _, tc := range safeSetHandlerTestCases(mux, ic) {
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-			tc.safeSetHandler.Safeset(res, req, nil)
+			tc.verifiedSetHandler.VerifiedSet(res, req, nil)
 		}
 		err := testHandler(
 			t,
@@ -53,24 +55,24 @@ func testSafeSetHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuC
 }
 
 type safeSetHandlerTestCase struct {
-	name           string
-	safeSetHandler SafesetHandler
-	payload        string
-	testFunc       func(*testing.T, string, int, map[string]interface{})
+	name               string
+	verifiedSetHandler VerifiedSetHandler
+	payload            string
+	testFunc           func(*testing.T, string, int, map[string]interface{})
 }
 
 func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []safeSetHandlerTestCase {
 	rt := newDefaultRuntime()
 	json := json.DefaultJSON()
-	ssh := NewSafesetHandler(mux, ic, rt, json)
+	ssh := NewVerifiedSetHandler(mux, ic, rt, json)
 	icd := client.DefaultClient()
-	safeSetWErr := func(context.Context, []byte, []byte) (*client.VerifiedIndex, error) {
+	safeSetWErr := func(context.Context, []byte, []byte) (*schema.TxMetadata, error){
 		return nil, errors.New("safeset error")
 	}
 	validKey := base64.StdEncoding.EncodeToString([]byte("safeSetKey1"))
 	validValue := base64.StdEncoding.EncodeToString([]byte("safeSetValue1"))
 	validPayload := fmt.Sprintf(
-		"{\"kv\": {\"key\": \"%s\", \"value\": \"%s\"}}",
+		"{\n  \"setRequest\": {\n    \"KVs\": [\n      {\n         \"key\": \"%s\",\n\t     \"value\": \"%s\"\n      }\n    ]\n  }\n}",
 		validKey,
 		validValue,
 	)
@@ -88,7 +90,8 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		{
 			"Missing value field",
 			ssh,
-			fmt.Sprintf("{\"kv\": {\"key\": \"%s\"}}", validKey),
+			fmt.Sprintf("{\n  \"setRequest\": {\n    \"KVs\": [\n      {\n         \"key\": \"%s\"\n      }\n    ]\n  }\n}",
+			validKey),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusOK, status)
 				requireResponseFieldsTrue(t, testCase, []string{"verified"}, body)
@@ -111,7 +114,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		{
 			"Sending plain text instead of base64 encoded",
 			ssh,
-			`{"kv": {"key": "safeSetKey1", "value": "safeSetValue1"}}`,
+			`{"setRequest": {"KVs": [{"key": "key","value": "val"}]}}`,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
 				expected :=
@@ -122,7 +125,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		{
 			"Missing key field",
 			ssh,
-			`{"kv": {} }`,
+			`{"setRequest": {"KVs": []}}`,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
 				expected := map[string]interface{}{"error": "invalid key"}
@@ -131,7 +134,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"AnnotateContext error",
-			NewSafesetHandler(mux, ic, newTestRuntimeWithAnnotateContextErr(), json),
+			NewVerifiedSetHandler(mux, ic, newTestRuntimeWithAnnotateContextErr(), json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -141,7 +144,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"SafeSet error",
-			NewSafesetHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, SafeSetF: safeSetWErr}, rt, json),
+			NewVerifiedSetHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, VerifiedSetF: safeSetWErr}, rt, json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -151,7 +154,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"JSON marshal error",
-			NewSafesetHandler(mux, ic, rt, newTestJSONWithMarshalErr()),
+			NewVerifiedSetHandler(mux, ic, rt, newTestJSONWithMarshalErr()),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -161,3 +164,4 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 	}
 }
+*/

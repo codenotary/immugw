@@ -18,39 +18,34 @@ package gw
 
 import (
 	"context"
-	"errors"
-	"io"
+	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 	"net/http"
+	"sync"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-// ErrInvalidItemProof ...
-var (
-	ErrInvalidItemProof = errors.New("proof does not match the given item")
-)
-
-// SetHandler ...
-type SetHandler interface {
-	Set(w http.ResponseWriter, req *http.Request, pathParams map[string]string)
+// VerifiedTxByIdHandler ...
+type VerifiedTxByIdHandler interface {
+	VerifiedTxById(w http.ResponseWriter, req *http.Request, pathParams map[string]string)
 }
 
-type setHandler struct {
+type verifiedTxByIdHandler struct {
 	mux     *runtime.ServeMux
 	client  client.ImmuClient
 	runtime Runtime
 	json    json.JSON
+	sync.RWMutex
 }
 
-// NewSetHandler ...
-func NewSetHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) SetHandler {
-	return &setHandler{
+// NewVerifiedTxById ...
+func NewVerifiedTxByIdHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) VerifiedTxByIdHandler {
+	return &verifiedTxByIdHandler{
 		mux:     mux,
 		client:  client,
 		runtime: rt,
@@ -58,50 +53,59 @@ func NewSetHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, 
 	}
 }
 
-func (h *setHandler) Set(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+func (h *verifiedTxByIdHandler) VerifiedTxById(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 	ctx, cancel := context.WithCancel(req.Context())
 	defer cancel()
-	inboundMarshaler, outboundMarshaler := h.runtime.MarshalerForRequest(h.mux, req)
-
+	_, outboundMarshaler := h.runtime.MarshalerForRequest(h.mux, req)
 	rctx, err := h.runtime.AnnotateContext(ctx, h.mux, req)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return
 	}
 
-	var protoReq schema.SetRequest
+	var protoReq schema.VerifiableTxRequest
 	var metadata runtime.ServerMetadata
 
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", berr))
-		return
-	}
-	if err := inboundMarshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
+	var (
+		val string
+		ok  bool
+		_   = err
+	)
+
+	val, ok = pathParams["tx"]
+	if !ok {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "missing parameter %s", "key"))
 		return
 	}
 
-	if len(protoReq.KVs) > 1 {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "set accept only one key value pair"))
+	protoReq.Tx, err = runtime.Uint64(val)
+
+	if err != nil {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "tx", err))
 		return
 	}
 
-	msg, err := h.client.Set(rctx, protoReq.KVs[0].Key, protoReq.KVs[0].Value)
-	ctx = h.runtime.NewServerMetadataContext(rctx, metadata)
+	if err := req.ParseForm(); err != nil {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
+		return
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, &utilities.DoubleArray{Encoding: map[string]int{"tx": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}); err != nil {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
+	}
+
+	msg, err := h.client.VerifiedTxByID(rctx, protoReq.Tx)
+	ctx = h.runtime.NewServerMetadataContext(ctx, metadata)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
 	newData, err := h.json.Marshal(msg)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return
 	}
-
 	if _, err := w.Write(newData); err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return

@@ -18,6 +18,9 @@ package gw
 
 import (
 	"context"
+	"github.com/codenotary/immudb/pkg/api/schema"
+	"github.com/grpc-ecosystem/grpc-gateway/utilities"
+	"io"
 	"net/http"
 
 	"github.com/codenotary/immudb/pkg/client"
@@ -47,33 +50,27 @@ func NewHistoryHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runti
 func (h *historyHandler) History(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 	ctx, cancel := context.WithCancel(req.Context())
 	defer cancel()
-	_, outboundMarshaler := h.runtime.MarshalerForRequest(h.mux, req)
-	rctx, err := h.runtime.AnnotateContext(ctx, h.mux, req)
+	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(h.mux, req)
+	rctx, err := runtime.AnnotateContext(ctx, h.mux, req)
 	if err != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
+		runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return
 	}
+
+	var protoReq schema.HistoryRequest
 	var metadata runtime.ServerMetadata
 
-	var (
-		val string
-		ok  bool
-	)
-
-	val, ok = pathParams["key"]
-	if !ok {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "missing parameter %s", "key"))
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", berr))
+		return
+	}
+	if err := inboundMarshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
 		return
 	}
 
-	key, err := h.runtime.Bytes(val)
-
-	if err != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "key", err))
-		return
-	}
-
-	msg, err := h.client.History(rctx, key)
+	msg, err := h.client.History(rctx, &protoReq)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return

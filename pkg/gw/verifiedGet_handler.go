@@ -20,6 +20,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"sync"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/codenotary/immudb/pkg/client"
@@ -30,21 +31,22 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// SafeReferenceHandler ...
-type SafeReferenceHandler interface {
-	SafeReference(w http.ResponseWriter, req *http.Request, pathParams map[string]string)
+// VerifiedGetHandler ...
+type VerifiedGetHandler interface {
+	VerifiedGet(w http.ResponseWriter, req *http.Request, pathParams map[string]string)
 }
 
-type safeReferenceHandler struct {
+type verifiedGetHandler struct {
 	mux     *runtime.ServeMux
 	client  client.ImmuClient
 	runtime Runtime
 	json    json.JSON
+	sync.RWMutex
 }
 
-// NewSafeReferenceHandler ...
-func NewSafeReferenceHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) SafeReferenceHandler {
-	return &safeReferenceHandler{
+// NewVerifiedGetHandler ...
+func NewVerifiedGetHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) VerifiedGetHandler {
+	return &verifiedGetHandler{
 		mux:     mux,
 		client:  client,
 		runtime: rt,
@@ -52,40 +54,36 @@ func NewSafeReferenceHandler(mux *runtime.ServeMux, client client.ImmuClient, rt
 	}
 }
 
-func (h *safeReferenceHandler) SafeReference(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+func (h *verifiedGetHandler) VerifiedGet(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 	ctx, cancel := context.WithCancel(req.Context())
 	defer cancel()
-	inboundMarshaler, outboundMarshaler := h.runtime.MarshalerForRequest(h.mux, req)
 
+	inboundMarshaler, outboundMarshaler := h.runtime.MarshalerForRequest(h.mux, req)
 	rctx, err := h.runtime.AnnotateContext(ctx, h.mux, req)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return
 	}
-
-	var protoReq schema.SafeReferenceOptions
+	var protoReq schema.VerifiableGetRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
 	if berr != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", berr))
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", berr))
 		return
 	}
 	if err = inboundMarshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
-		return
-	}
-	if protoReq.Ro == nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "incorrect JSON payload"))
-		return
-	}
-	msg, err := h.client.SafeReference(rctx, protoReq.Ro.Reference, protoReq.Ro.Key)
-	if err != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
 		return
 	}
 
-	ctx = h.runtime.NewServerMetadataContext(rctx, metadata)
+	msg, err := h.client.VerifiedGetAt(rctx, protoReq.KeyRequest.Key, protoReq.KeyRequest.AtTx)
+	ctx = h.runtime.NewServerMetadataContext(ctx, metadata)
+	if err != nil {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	newData, err := h.json.Marshal(msg)
 	if err != nil {

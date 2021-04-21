@@ -15,6 +15,7 @@ limitations under the License.
 */
 package gw
 
+/*
 import (
 	"context"
 	"encoding/base64"
@@ -69,7 +70,7 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 	defaultJSON := json.DefaultJSON()
 	hh := NewHistoryHandler(mux, ic, rt, defaultJSON)
 	icd := client.DefaultClient()
-	historyWErr := func(context.Context, []byte) (*schema.StructuredItemList, error) {
+	historyWErr := func(context.Context, *schema.HistoryRequest) (*schema.Entries, error) {
 		return nil, errors.New("history error")
 	}
 	validKey := base64.StdEncoding.EncodeToString([]byte("setKey1"))
@@ -151,3 +152,4 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 	}
 }
+*/

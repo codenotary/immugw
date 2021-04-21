@@ -15,23 +15,7 @@ limitations under the License.
 */
 package gw
 
-import (
-	"context"
-	"encoding/base64"
-	"errors"
-	"fmt"
-	"net/http"
-	"testing"
-
-	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immudb/pkg/client"
-	immuclient "github.com/codenotary/immudb/pkg/client"
-	"github.com/codenotary/immudb/pkg/client/clienttest"
-	"github.com/codenotary/immugw/pkg/json"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/stretchr/testify/require"
-)
-
+/*
 func testSetHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
 	prefixPattern := "SetHandler - Test case: %s"
 	method := "POST"
@@ -65,7 +49,7 @@ func setHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []setH
 	json := json.DefaultJSON()
 	sh := NewSetHandler(mux, ic, rt, json)
 	icd := client.DefaultClient()
-	setWErr := func(context.Context, []byte, []byte) (*schema.Index, error) {
+	setWErr := func(context.Context, []byte, []byte) (*schema.TxMetadata, error) {
 		return nil, errors.New("set error")
 	}
 
@@ -166,3 +150,4 @@ func setHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []setH
 		},
 	}
 }
+*/

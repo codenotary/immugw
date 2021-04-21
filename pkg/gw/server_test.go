@@ -29,12 +29,17 @@ import (
 )
 
 func TestImmuGwServer_Start(t *testing.T) {
-	opt := server.DefaultOptions().WithAuth(false).WithInMemoryStore(true).WithNetwork("tcp").WithAddress("").WithPort(50051)
-	bs := servertest.NewBufconnServer(opt)
+	options := server.DefaultOptions().WithAuth(true)
+	bs := servertest.NewBufconnServer(options)
+
 	bs.Start()
+	defer bs.Stop()
+
+	defer os.RemoveAll(options.Dir)
+	defer os.Remove(".state-")
 
 	cliOpts := client.Options{
-		Dir:                opt.Dir,
+		Dir:                options.Dir,
 		Address:            "",
 		Port:               50051,
 		HealthCheckRetries: 1,
@@ -65,12 +70,17 @@ func TestImmuGwServer_Start(t *testing.T) {
 
 func TestImmuGwServer_StartWithAuditor(t *testing.T) {
 
-	opt := server.DefaultOptions().WithAuth(false).WithInMemoryStore(true).WithNetwork("tcp").WithAddress("").WithPort(50051)
-	bs := servertest.NewBufconnServer(opt)
+	options := server.DefaultOptions().WithAuth(true)
+	bs := servertest.NewBufconnServer(options)
+
 	bs.Start()
+	defer bs.Stop()
+
+	defer os.RemoveAll(options.Dir)
+	defer os.Remove(".state-")
 
 	cliOpts := client.Options{
-		Dir:                opt.Dir,
+		Dir:                options.Dir,
 		Address:            "",
 		Port:               50051,
 		HealthCheckRetries: 1,
