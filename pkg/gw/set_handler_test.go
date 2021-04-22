@@ -35,7 +35,7 @@ import (
 func testSetHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
 	prefixPattern := "SetHandler - Test case: %s"
 	method := "POST"
-	path := "/v1/immurestproxy/item"
+	path := "/db/set"
 	for _, tc := range setHandlerTestCases(mux, ic) {
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 			tc.setHandler.Set(res, req, nil)

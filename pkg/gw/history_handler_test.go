@@ -15,7 +15,6 @@ limitations under the License.
 */
 package gw
 
-/*
 import (
 	"context"
 	"encoding/base64"
@@ -35,22 +34,18 @@ import (
 
 func testHistoryHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
 	prefixPattern := "HistoryHandler - Test case: %s"
-	method := "GET"
+	method := "POST"
 	for _, tc := range historyHandlerTestCases(mux, ic) {
-		path := "/v1/immurestproxy/history/" + tc.key
+		path := "/db/history/"
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-			var pathParams map[string]string
-			if tc.key != "" {
-				pathParams = map[string]string{"key": tc.key}
-			}
-			tc.historyHandler.History(res, req, pathParams)
+			tc.historyHandler.History(res, req, nil)
 		}
 		err := testHandler(
 			t,
 			fmt.Sprintf(prefixPattern, tc.name),
 			method,
 			path,
-			"",
+			tc.payload,
 			handlerFunc,
 			tc.testFunc,
 		)
@@ -61,7 +56,7 @@ func testHistoryHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuC
 type historyHandlerTestCase struct {
 	name           string
 	historyHandler HistoryHandler
-	key            string
+	payload        string
 	testFunc       func(*testing.T, string, int, map[string]interface{})
 }
 
@@ -73,17 +68,22 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 	historyWErr := func(context.Context, *schema.HistoryRequest) (*schema.Entries, error) {
 		return nil, errors.New("history error")
 	}
-	validKey := base64.StdEncoding.EncodeToString([]byte("setKey1"))
+	validPayload := fmt.Sprintf(
+		`{
+			"key": "%s"
+		}`,
+		base64.StdEncoding.EncodeToString([]byte("setKey1")),
+	)
 
 	return []historyHandlerTestCase{
 		{
 			"Sending correct request",
 			hh,
-			validKey,
+			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusOK, status)
-				items, ok := body["items"]
-				require.True(t, ok, "%sfield \"items\" not found in response %v", testCase, body)
+				items, ok := body["entries"]
+				require.True(t, ok, "%sfield \"entries\" not found in response %v", testCase, body)
 				notEmptyMsg := "%sexpected more than on item in response %v"
 				require.True(t, len(items.([]interface{})) > 0, notEmptyMsg, testCase, body)
 			},
@@ -91,31 +91,32 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		{
 			"Sending correct request with non-existent key",
 			hh,
-			base64.StdEncoding.EncodeToString([]byte("historyNonExistentKey1")),
+			fmt.Sprintf(
+				`{
+			"key": "%s"
+		}`, base64.StdEncoding.EncodeToString([]byte("historyNonExistentKey1"))),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
-				requireResponseStatus(t, testCase, http.StatusOK, status)
-				notEmptyMsg := "%sexpected empty response, actual response length is %d"
-				require.Equal(t, 0, len(body), notEmptyMsg, testCase, len(body))
+				requireResponseStatus(t, testCase, http.StatusNotFound, status)
 			},
 		},
 		{
 			"Missing key path param",
 			hh,
-			"",
+			`{}`,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
-				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
-				requireResponseFieldsEqual(
-					t, testCase, map[string]interface{}{"error": "missing parameter key"}, body)
+				requireResponseStatus(t, testCase, http.StatusNotFound, status)
 			},
 		},
 		{
 			"Sending plain text instead of base64 encoded",
 			hh,
-			"setKey1",
+			`{
+				"key": "setKey1"
+			}`,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
 				expectedError :=
-					"type mismatch, parameter: key, error: illegal base64 data at input byte 4"
+					"illegal base64 data at input byte 4"
 				requireResponseFieldsEqual(
 					t, testCase, map[string]interface{}{"error": expectedError}, body)
 			},
@@ -123,7 +124,7 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		{
 			"AnnotateContext error",
 			NewHistoryHandler(mux, ic, newTestRuntimeWithAnnotateContextErr(), defaultJSON),
-			validKey,
+			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
 				requireResponseFieldsEqual(
@@ -133,7 +134,7 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		{
 			"History error",
 			NewHistoryHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, HistoryF: historyWErr}, rt, defaultJSON),
-			validKey,
+			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
 				requireResponseFieldsEqual(
@@ -143,7 +144,7 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		{
 			"JSON marshal error",
 			NewHistoryHandler(mux, ic, rt, newTestJSONWithMarshalErr()),
-			validKey,
+			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
 				requireResponseFieldsEqual(
@@ -152,4 +153,3 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 	}
 }
-*/
