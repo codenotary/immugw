@@ -41,3 +41,21 @@ jobs:
         env:
           GO111MODULE: "on"
         run: make all
+  coveralls:
+    name: Coverage
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+      - uses: actions/checkout@v1
+      - run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          go get golang.org/x/tools/cmd/cover
+          go get -u github.com/mattn/goveralls
+          go get -u github.com/ory/go-acc
+          set -o pipefail
+          go-acc ./... --covermode=atomic --ignore test,version || true
+          cat coverage.txt > coverage.out
+          goveralls -coverprofile=coverage.out -service=gh-ci -repotoken ${{ secrets.COVERALLS_TOKEN }}
