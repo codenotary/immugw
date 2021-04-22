@@ -45,6 +45,8 @@ github.com/codenotary/immudb v0.9.2 h1:cki7hims4bRmT5c9y/5MX3a3fzNSBh1FH+vrs/lbD
 github.com/codenotary/immudb v0.9.2/go.mod h1:Bb96jot0qKMMMXWkTwgexImbBVfXpL3abmNtXmQLq/o=
 github.com/codenotary/immudb v0.9.3-0.20210421154120-e408bf009fb0 h1:84eBAV2DoakCtHGOWG+S7Pn/UWMCCk8/3Er4MLSn30s=
 github.com/codenotary/immudb v0.9.3-0.20210421154120-e408bf009fb0/go.mod h1:Bb96jot0qKMMMXWkTwgexImbBVfXpL3abmNtXmQLq/o=
+github.com/codenotary/immudb v0.9.3-0.20210422101551-cdf372b3ecf6 h1:Hcnl+nJc+KU9qinv4T3ra1xoproiIwTjNyoG5sVLv0s=
+github.com/codenotary/immudb v0.9.3-0.20210422101551-cdf372b3ecf6/go.mod h1:Bb96jot0qKMMMXWkTwgexImbBVfXpL3abmNtXmQLq/o=
 github.com/codenotary/merkletree v0.1.2-0.20200720105344-68d95395a656 h1:Rp8hZs7t0fNLlfLj9PzEmW/W7X+nSp0vpu5CB0ba0jM=
 github.com/codenotary/merkletree v0.1.2-0.20200720105344-68d95395a656/go.mod h1:RkIGSuQ3nHZbE0rH21aYxyqlrI/2eICNOOIanDbzZPg=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
