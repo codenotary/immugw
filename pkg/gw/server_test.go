@@ -17,7 +17,6 @@ package gw
 
 import (
 	"github.com/codenotary/immudb/pkg/client"
-	"github.com/codenotary/immudb/pkg/client/clienttest"
 	"github.com/codenotary/immudb/pkg/logger"
 	"github.com/codenotary/immudb/pkg/server"
 	"github.com/codenotary/immudb/pkg/server/servertest"
@@ -38,33 +37,30 @@ func TestImmuGwServer_Start(t *testing.T) {
 	defer os.RemoveAll(options.Dir)
 	defer os.Remove(".state-")
 
-	cliOpts := client.Options{
-		Dir:                options.Dir,
-		Address:            "",
-		Port:               50051,
-		HealthCheckRetries: 1,
-		MTLs:               false,
-		MTLsOptions:        client.MTLsOptions{},
-		Auth:               true,
-		Config:             "",
-		DialOptions: &[]grpc.DialOption{
+	cliOpts := client.DefaultOptions().
+		WithDir(options.Dir).
+		WithPort(0).
+		WithAddress("").
+		WithHealthCheckRetries(1).
+		WithMTLs(options.MTLs).
+		WithMTLsOptions(client.MTLsOptions{}).
+		WithMaxRecvMsgSize(4 * 1024 * 1024).
+		WithAuth(true).
+		WithConfig("").
+		WithDialOptions(&[]grpc.DialOption{
 			grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure(),
-		},
-		Tkns: client.NewTokenService().WithTokenFileName("tokenFileName").WithHds(clienttest.DefaultHomedirServiceMock()),
-	}
+		})
 
 	l := logger.NewSimpleLogger("test", os.Stdout)
 	gw := ImmuGwServer{
 		Options:      Options{},
-		CliOptions:   cliOpts,
+		CliOptions:   *cliOpts,
 		Logger:       l,
 		quit:         make(chan struct{}, 1),
 		MetricServer: newMetricsServer(DefaultOptions().MetricsBind(), l, func() float64 { return time.Since(startedAt).Hours() }),
 	}
 	gw.quit <- struct{}{}
 	err := gw.Start()
-	assert.Nil(t, err)
-	err = gw.Stop()
 	assert.Nil(t, err)
 }
 
@@ -79,25 +75,24 @@ func TestImmuGwServer_StartWithAuditor(t *testing.T) {
 	defer os.RemoveAll(options.Dir)
 	defer os.Remove(".state-")
 
-	cliOpts := client.Options{
-		Dir:                options.Dir,
-		Address:            "",
-		Port:               50051,
-		HealthCheckRetries: 1,
-		MTLs:               false,
-		MTLsOptions:        client.MTLsOptions{},
-		Auth:               true,
-		Config:             "",
-		DialOptions: &[]grpc.DialOption{
+	cliOpts := client.DefaultOptions().
+		WithDir(options.Dir).
+		WithPort(0).
+		WithAddress("").
+		WithHealthCheckRetries(1).
+		WithMTLs(options.MTLs).
+		WithMTLsOptions(client.MTLsOptions{}).
+		WithMaxRecvMsgSize(4 * 1024 * 1024).
+		WithAuth(true).
+		WithConfig("").
+		WithDialOptions(&[]grpc.DialOption{
 			grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure(),
-		},
-		Tkns: client.NewTokenService().WithTokenFileName("tokenFileName").WithHds(clienttest.DefaultHomedirServiceMock()),
-	}
+		})
 
 	l := logger.NewSimpleLogger("test", os.Stdout)
 	gw := ImmuGwServer{
 		Options:      Options{}.WithAudit(true).WithAuditInterval(5 * time.Millisecond),
-		CliOptions:   cliOpts,
+		CliOptions:   *cliOpts,
 		Logger:       l,
 		quit:         make(chan struct{}, 1),
 		auditorDone:  make(chan struct{}, 1),
@@ -107,7 +102,5 @@ func TestImmuGwServer_StartWithAuditor(t *testing.T) {
 	gw.auditorDone <- struct{}{}
 
 	err := gw.Start()
-	assert.Nil(t, err)
-	err = gw.Stop()
 	assert.Nil(t, err)
 }
