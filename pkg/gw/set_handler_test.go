@@ -15,7 +15,23 @@ limitations under the License.
 */
 package gw
 
-/*
+import (
+	"context"
+	"encoding/base64"
+	"errors"
+	"fmt"
+	"github.com/codenotary/immudb/pkg/api/schema"
+	"net/http"
+	"testing"
+
+	"github.com/codenotary/immudb/pkg/client"
+	immuclient "github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immudb/pkg/client/clienttest"
+	"github.com/codenotary/immugw/pkg/json"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/stretchr/testify/require"
+)
+
 func testSetHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
 	prefixPattern := "SetHandler - Test case: %s"
 	method := "POST"
@@ -56,7 +72,14 @@ func setHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []setH
 	validKey := base64.StdEncoding.EncodeToString([]byte("setKey1"))
 	validValue := base64.StdEncoding.EncodeToString([]byte("setValue1"))
 	validPayload := fmt.Sprintf(
-		"{\"key\": \"%s\", \"value\": \"%s\"}",
+		`{
+  "KVs": [
+    {
+        "key": "%s",
+        "value": "%s"
+    }
+  ]
+}`,
 		validKey,
 		validValue,
 	)
@@ -68,53 +91,75 @@ func setHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []setH
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusOK, status)
-				requireResponseFields(t, testCase, []string{"index"}, body)
+				requireResponseFields(t, testCase, []string{"id"}, body)
 			},
 		},
-		{
-			"Missing value field",
-			sh,
-			fmt.Sprintf(
-				"{\"key\": \"%s\"}",
-				validKey,
-			),
-			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
-				requireResponseStatus(t, testCase, http.StatusOK, status)
-				requireResponseFields(t, testCase, []string{"index"}, body)
-			},
-		},
+		/*		{
+				"Missing value field",
+				sh,
+				fmt.Sprintf(
+					`{
+					  "KVs": [
+						{
+							"key": "%s"
+						}
+					  ]
+					}`,
+					validKey,
+				),
+				func(t *testing.T, testCase string, status int, body map[string]interface{}) {
+					requireResponseStatus(t, testCase, http.StatusOK, status)
+					requireResponseFields(t, testCase, []string{"index"}, body)
+				},
+			},*/
 		{
 			"Sending incorrect json field",
 			sh,
 			fmt.Sprintf(
-				"{\"keyX\": \"%s\", \"value\": \"%s\"}",
+				`{
+						  "KVs": [
+							{
+								"keyX": "%s",
+								"value": "%s"
+							}
+						  ]
+						}`,
 				validKey,
 				validValue,
 			),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
-				expected := map[string]interface{}{"error": "invalid key"}
+				expected := map[string]interface{}{"error": "illegal arguments"}
 				requireResponseFieldsEqual(t, testCase, expected, body)
 			},
 		},
 		{
 			"Sending plain text instead of base64 encoded",
 			sh,
-			`{"key": "setKey1", "value": "setValue1"}`,
+			`{
+			"KVs": [
+					{
+						"key": "key",
+						"value": "val"
+					}
+				]
+				}`,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
 				expected :=
-					map[string]interface{}{"error": "illegal base64 data at input byte 4"}
+					map[string]interface{}{"error": "illegal base64 data at input byte 0"}
 				requireResponseFieldsEqual(t, testCase, expected, body)
 			},
 		},
 		{
 			"Missing key field",
 			sh,
-			`{}`,
+			`{
+				  "KVs": [{}]
+				}`,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
-				expected := map[string]interface{}{"error": "invalid key"}
+				expected := map[string]interface{}{"error": "illegal arguments"}
 				requireResponseFieldsEqual(t, testCase, expected, body)
 			},
 		},
@@ -150,4 +195,3 @@ func setHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []setH
 		},
 	}
 }
-*/

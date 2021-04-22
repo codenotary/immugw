@@ -87,6 +87,11 @@ func (h *setHandler) Set(w http.ResponseWriter, req *http.Request, pathParams ma
 		return
 	}
 
+	if len(protoReq.KVs) == 0 {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "set accept at least one key value pair"))
+		return
+	}
+
 	msg, err := h.client.Set(rctx, protoReq.KVs[0].Key, protoReq.KVs[0].Value)
 	ctx = h.runtime.NewServerMetadataContext(rctx, metadata)
 	if err != nil {
