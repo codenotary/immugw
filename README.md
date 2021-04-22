@@ -103,12 +103,14 @@ Environment variables:
   IMMUGW_DETACHED=false
   IMMUGW_MTLS=false
   IMMUGW_SERVERNAME=localhost
-  IMMUGW_PKEY=./tools/mtls/4_client/private/localhost.key.pem
-  IMMUGW_CERTIFICATE=./tools/mtls/4_client/certs/localhost.cert.pem
-  IMMUGW_CLIENTCAS=./tools/mtls/2_intermediate/certs/ca-chain.cert.pem
-  IMMUGW_AUDIT="false"
-  IMMUGW_AUDIT_PASSWORD=""
-  IMMUGW_AUDIT_USERNAME=""
+  IMMUGW_AUDIT=false
+  IMMUGW_AUDIT_INTERVAL=5m
+  IMMUGW_AUDIT_USERNAME=immugwauditor
+  IMMUGW_AUDIT_PASSWORD=
+  IMMUGW_AUDIT_SIGNATURE=ignore
+  IMMUGW_PKEY=
+  IMMUGW_CERTIFICATE=
+  IMMUGW_CLIENTCAS=
 
 Usage:
   immugw [flags]
@@ -188,6 +190,119 @@ If you want to run the Swagger UI, simply run the following docker command after
 ```
 docker run -d -it -p 8081:8080 --name swagger-immugw -v ${PWD}/pkg/api/gw.schema.swagger.json/openapi.json -e SWAGGER_JSON=/openapi.json  swaggerapi/swagger-ui
 ```
+### CURL examples
+
+#### Login
+```shell script
+curl --location --request POST '127.0.0.1:3323/login' \
+--header 'Authorization;' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "user": "aW1tdWRi",
+    "password": "aW1tdWRi"
+}'
+```
+#### Use Database
+```shell script
+curl --location --request GET '127.0.0.1:3323/db/use/defaultdb' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: {{token}}'
+```
+#### Login
+```shell script
+curl --location --request POST '127.0.0.1:3323/login' \
+--header 'Authorization;' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "user": "aW1tdWRi",
+    "password": "aW1tdWRi"
+}'
+```
+#### Verified Set
+```shell script
+curl --location --request POST '127.0.0.1:3323/db/verified/set' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: {{token}}' \
+--data-raw '{
+  "setRequest": {
+    "KVs": [
+      {
+        "key": "a2V5MQ==",
+	   "value": "dmFsMQ=="
+      }
+    ]
+  }
+}'
+```
+#### Verified Get
+```shell script
+curl --location --request POST '127.0.0.1:3323/db/verified/get' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: {{token}}' \
+--data-raw '{
+  "keyRequest": {
+    "key": "a2V5MQ=="
+  }
+}'
+```
+#### Verified Reference
+```shell script
+curl --location --request POST '127.0.0.1:3323/db/verified/setreference' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: {{token}}' \
+--data-raw '{
+  "referenceRequest": {
+    "key": "dGFnMQ==",
+    "referencedKey": "a2V5MQ==",
+    "atTx": "0"
+  }
+}'
+```
+#### Verified ZAdd
+```shell script
+curl --location --request POST '127.0.0.1:3323/db/verified/zadd' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: {{token}}' \
+--data-raw '{
+  "zAddRequest": {
+    "set": "c2V0MQ==",
+    "score": 15.5,
+    "key": "a2V5MQ==",
+    "atTx": "0"
+  }
+}'
+```
+#### ZScan
+```shell script
+curl --location --request POST '127.0.0.1:3323/db/zscan' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: {{token}}' \
+--data-raw '{
+  "set": "c2V0MQ=="
+}'
+```
+#### History
+```shell script
+curl --location --request POST '127.0.0.1:3323/db/history' \
+--header 'Authorization: {{token}}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "key": "a2V5NQ=="
+}'
+```
+#### Verified Transaction
+```shell script
+curl --location --request GET '127.0.0.1:3323/db/verified/tx/1' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: {{token}}'
+```
+#### Logout
+```shell script
+curl --location --request POST '127.0.0.1:3323/logout' \
+--header 'Authorization: {{token}}' \
+--header 'Content-Type: application/json'
+```
+
 
 ## License
 
