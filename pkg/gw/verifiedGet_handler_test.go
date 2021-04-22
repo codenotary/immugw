@@ -15,7 +15,6 @@ limitations under the License.
 */
 package gw
 
-/*
 import (
 	"context"
 	"encoding/base64"
@@ -25,7 +24,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/codenotary/immudb/pkg/client"
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/clienttest"
 	"github.com/codenotary/immugw/pkg/json"
@@ -36,7 +34,7 @@ import (
 func testSafeGetHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
 	prefixPattern := "SafeGetHandler - Test case: %s"
 	method := "POST"
-	path := "/v1/immurestproxy/item/safe/get"
+	path := "/db/verified/get"
 	for _, tc := range safeGetHandlerTestCases(mux, ic) {
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 			tc.safeGetHandler.VerifiedGet(res, req, nil)
@@ -65,12 +63,16 @@ func safeGetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 	rt := newDefaultRuntime()
 	defaultJSON := json.DefaultJSON()
 	sgh := NewVerifiedGetHandler(mux, ic, rt, defaultJSON)
-	icd := client.DefaultClient()
-	safeGetWErr := func(context.Context, []byte) (*schema.Entry, error) {
-		return nil, errors.New("safeget error")
+	//icd := client.DefaultClient()
+	verifiedGetWErr := func(context.Context, []byte, uint64) (*schema.Entry, error) {
+		return nil, errors.New("verified get error")
 	}
 	validKey := base64.StdEncoding.EncodeToString([]byte("setKey1"))
-	validPayload := fmt.Sprintf("{\"key\": \"%s\"}", validKey)
+	validPayload := fmt.Sprintf(`{
+  "keyRequest": {
+    "key": "%s"
+  }
+}`, validKey)
 
 	return []safeGetHandlerTestCase{
 		{
@@ -80,24 +82,31 @@ func safeGetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusOK, status)
 				requireResponseFields(
-					t, testCase, []string{"index", "key", "value", "time"}, body)
-				requireResponseFieldsTrue(t, testCase, []string{"verified"}, body)
+					t, testCase, []string{"tx", "key", "value"}, body)
 			},
 		},
 		{
 			"Sending incorrect json field",
 			sgh,
-			fmt.Sprintf("{\"keyX\": \"%s\"}", validKey),
+			fmt.Sprintf(`{
+  "keyRequest": {
+    "keyX": "%s"
+  }
+}`, validKey),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
-				expected := map[string]interface{}{"error": "invalid key"}
+				expected := map[string]interface{}{"error": "illegal arguments"}
 				requireResponseFieldsEqual(t, testCase, expected, body)
 			},
 		},
 		{
 			"Sending plain text instead of base64 encoded",
 			sgh,
-			`{"key": "setKey1"}`,
+			`{
+  "keyRequest": {
+    "key": "setKey1"
+  }
+}`,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
 				expected :=
@@ -108,10 +117,12 @@ func safeGetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		{
 			"Missing key field",
 			sgh,
-			`{}`,
+			`{
+  "keyRequest": {}
+}`,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
-				expected := map[string]interface{}{"error": "invalid key"}
+				expected := map[string]interface{}{"error": "illegal arguments"}
 				requireResponseFieldsEqual(t, testCase, expected, body)
 			},
 		},
@@ -127,12 +138,12 @@ func safeGetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"VerifiedGet error",
-			NewVerifiedGetHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, VerifiedGetF: safeGetWErr}, rt, defaultJSON),
+			NewVerifiedGetHandler(mux, &clienttest.ImmuClientMock{VerifiedGetAtF: verifiedGetWErr}, rt, defaultJSON),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
 				requireResponseFieldsEqual(
-					t, testCase, map[string]interface{}{"error": "safeget error"}, body)
+					t, testCase, map[string]interface{}{"error": "verified get error"}, body)
 			},
 		},
 		{
@@ -147,4 +158,3 @@ func safeGetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 	}
 }
-*/
