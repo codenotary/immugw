@@ -75,13 +75,18 @@ func (h *verifiedSetHandler) VerifiedSet(w http.ResponseWriter, req *http.Reques
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
 		return
 	}
-	if protoReq.SetRequest.KVs == nil {
+	if protoReq.SetRequest == nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "incorrect JSON payload"))
 		return
 	}
 
 	if len(protoReq.SetRequest.KVs) > 1 {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "verifiedSet accept only one key value pair"))
+		return
+	}
+
+	if len(protoReq.SetRequest.KVs) == 0 {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "verifiedSet accept at least one key value pair"))
 		return
 	}
 

@@ -15,7 +15,6 @@ limitations under the License.
 */
 package gw
 
-/*
 import (
 	"context"
 	"encoding/base64"
@@ -36,7 +35,7 @@ import (
 func testSafeSetHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
 	prefixPattern := "SafeSetHandler - Test case: %s"
 	method := "POST"
-	path := "/db/verified/set"
+	path := "/db/verifiable/set"
 	for _, tc := range safeSetHandlerTestCases(mux, ic) {
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 			tc.verifiedSetHandler.VerifiedSet(res, req, nil)
@@ -66,7 +65,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 	json := json.DefaultJSON()
 	ssh := NewVerifiedSetHandler(mux, ic, rt, json)
 	icd := client.DefaultClient()
-	safeSetWErr := func(context.Context, []byte, []byte) (*schema.TxMetadata, error){
+	safeSetWErr := func(context.Context, []byte, []byte) (*schema.TxMetadata, error) {
 		return nil, errors.New("safeset error")
 	}
 	validKey := base64.StdEncoding.EncodeToString([]byte("safeSetKey1"))
@@ -84,17 +83,15 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusOK, status)
-				requireResponseFieldsTrue(t, testCase, []string{"verified"}, body)
 			},
 		},
 		{
 			"Missing value field",
 			ssh,
 			fmt.Sprintf("{\n  \"setRequest\": {\n    \"KVs\": [\n      {\n         \"key\": \"%s\"\n      }\n    ]\n  }\n}",
-			validKey),
+				validKey),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusOK, status)
-				requireResponseFieldsTrue(t, testCase, []string{"verified"}, body)
 			},
 		},
 		{
@@ -117,8 +114,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 			`{"setRequest": {"KVs": [{"key": "key","value": "val"}]}}`,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
-				expected :=
-					map[string]interface{}{"error": "illegal base64 data at input byte 8"}
+				expected := map[string]interface{}{"error": "illegal base64 data at input byte 0"}
 				requireResponseFieldsEqual(t, testCase, expected, body)
 			},
 		},
@@ -128,7 +124,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 			`{"setRequest": {"KVs": []}}`,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
-				expected := map[string]interface{}{"error": "invalid key"}
+				expected := map[string]interface{}{"error": "verifiedSet accept at least one key value pair"}
 				requireResponseFieldsEqual(t, testCase, expected, body)
 			},
 		},
@@ -164,4 +160,3 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 	}
 }
-*/

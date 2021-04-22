@@ -15,75 +15,26 @@ limitations under the License.
 */
 package gw
 
-/*
 import (
-	"context"
 	"errors"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/client/state"
-	"google.golang.org/grpc/metadata"
-	"log"
-	"net"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"strconv"
-	"strings"
-	"testing"
-	"time"
-
-	"github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/codenotary/immudb/pkg/client"
-	"github.com/codenotary/immudb/pkg/client/cache"
-	"github.com/codenotary/immudb/pkg/client/timestamp"
-	"github.com/codenotary/immugw/pkg/json"
-	"github.com/codenotary/immudb/pkg/logger"
 	"github.com/codenotary/immudb/pkg/server"
 	"github.com/codenotary/immudb/pkg/server/servertest"
+	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
+	"log"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"strings"
+	"testing"
 )
-/*
-func newClient(bufDialer func(context.Context, string) (net.Conn, error)) client.ImmuClient {
-	dialOptions := []grpc.DialOption{
-		grpc.WithContextDialer(bufDialer), grpc.WithInsecure(),
-	}
-	immuclient := client.DefaultClient().WithOptions(
-		client.DefaultOptions().WithAuth(false).WithDialOptions(&dialOptions))
-	clientConn, _ := immuclient.Connect(context.TODO())
-	immuclient.WithClientConn(clientConn)
-	serviceClient := schema.NewImmuServiceClient(clientConn)
-	immuclient.WithServiceClient(serviceClient)
-
-
-	stateProvider := state.NewStateProvider(serviceClient)
-	uuidProvider := state.NewUUIDProvider(serviceClient)
-
-	stateService, _  := state.NewStateService(cache.NewInMemoryCache(), logger.NewSimpleLogger("handlers_test", os.Stdout), stateProvider, uuidProvider)
-
-	immuclient.WithStateService(stateService)
-	return immuclient
-}
-
-type ntpMock struct {
-	t time.Time
-}
-
-func (n *ntpMock) Now() time.Time {
-	return n.t
-}
-func newNtpMock() (timestamp.TsGenerator, error) {
-	i, err := strconv.ParseInt("1405544146", 10, 64)
-	if err != nil {
-		log.Fatal(err)
-	}
-	tm := time.Unix(i, 0)
-	return &ntpMock{tm}, nil
-}
 
 func TestGw(t *testing.T) {
-	options := server.DefaultOptions().WithAuth(true)
+	options := server.DefaultOptions().WithAuth(false)
 	bs := servertest.NewBufconnServer(options)
 
 	bs.Start()
@@ -92,21 +43,23 @@ func TestGw(t *testing.T) {
 	defer os.RemoveAll(options.Dir)
 	defer os.Remove(".state-")
 
-	immuClient := newClient(bs.Dialer)
-	mux := runtime.NewServeMux(runtime.WithProtoErrorHandler(runtime.DefaultHTTPProtoErrorHandler))
+	immuClient, _ := client.NewImmuClient(client.DefaultOptions().WithDialOptions(&[]grpc.DialOption{grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure()}).WithAuth(false))
+
+	mux := runtime.NewServeMux(runtime.WithProtoErrorHandler(runtime.DefaultHTTPError))
+
 	testSafeSetHandler(t, mux, immuClient)
-	testSetHandler(t, mux, immuClient)
+	/*testSetHandler(t, mux, immuClient)
 	testSafeGetHandler(t, mux, immuClient)
 	testHistoryHandler(t, mux, immuClient)
 	testSafeReferenceHandler(t, mux, immuClient)
-	testVerifiedZaddHandler(t, mux, immuClient)
+	testVerifiedZaddHandler(t, mux, immuClient)*/
 }
 
-func TestAuthGw(t *testing.T) {
+/*func TestAuthGw(t *testing.T) {
 	options := server.DefaultOptions().WithAuth(true)
 	bs := servertest.NewBufconnServer(options)
 
-	bs.Start()
+	//bs.Start()
 	defer bs.Stop()
 
 	defer os.RemoveAll(options.Dir)
@@ -137,9 +90,9 @@ func TestAuthGw(t *testing.T) {
 	ctx = metadata.NewOutgoingContext(context.Background(), md)
 
 	require.NoError(t, immuClient.HealthCheck(ctx))
-	mux := runtime.NewServeMux()
-	testUseDatabaseHandler(t, ctx, mux, immuClient)
-}
+	//mux := runtime.NewServeMux()
+	//testUseDatabaseHandler(t, ctx, mux, immuClient)
+}*/
 
 func testHandler(
 	t *testing.T,
@@ -151,7 +104,8 @@ func testHandler(
 	testFunc func(*testing.T, string, int, map[string]interface{}),
 ) error {
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest(method, path, strings.NewReader(body))
+	req, err := http.NewRequest(method, path, strings.NewReader(body))
+	require.NoError(t, err)
 	req.Header.Add("Content-Type", "application/json")
 	handler := http.HandlerFunc(handlerFunc)
 	handler.ServeHTTP(w, req)
@@ -249,4 +203,3 @@ func (pr *PasswordReader) Read(msg string) ([]byte, error) {
 	pr.callNumber++
 	return pass, nil
 }
-*/
