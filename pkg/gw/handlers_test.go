@@ -50,7 +50,7 @@ func TestGw(t *testing.T) {
 	testSafeSetHandler(t, mux, immuClient)
 	testSetHandler(t, mux, immuClient)
 	testSafeGetHandler(t, mux, immuClient)
-	//testHistoryHandler(t, mux, immuClient)
+	testHistoryHandler(t, mux, immuClient)
 	//testSafeReferenceHandler(t, mux, immuClient)
 	//testVerifiedZaddHandler(t, mux, immuClient)
 }

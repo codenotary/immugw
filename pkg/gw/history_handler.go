@@ -51,9 +51,10 @@ func (h *historyHandler) History(w http.ResponseWriter, req *http.Request, pathP
 	ctx, cancel := context.WithCancel(req.Context())
 	defer cancel()
 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(h.mux, req)
-	rctx, err := runtime.AnnotateContext(ctx, h.mux, req)
+
+	rctx, err := h.runtime.AnnotateContext(ctx, h.mux, req)
 	if err != nil {
-		runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return
 	}
 
@@ -62,21 +63,21 @@ func (h *historyHandler) History(w http.ResponseWriter, req *http.Request, pathP
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
 	if berr != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", berr))
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", berr))
 		return
 	}
 	if err := inboundMarshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
 		return
 	}
 
 	msg, err := h.client.History(rctx, &protoReq)
+	ctx = h.runtime.NewServerMetadataContext(ctx, metadata)
 	if err != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
 		return
 	}
 
-	ctx = h.runtime.NewServerMetadataContext(ctx, metadata)
 	w.Header().Set("Content-Type", "application/json")
 	newData, err := h.json.Marshal(msg)
 	if err != nil {
