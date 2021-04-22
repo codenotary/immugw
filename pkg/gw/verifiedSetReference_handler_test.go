@@ -15,7 +15,6 @@ limitations under the License.
 */
 package gw
 
-/*
 import (
 	"context"
 	"encoding/base64"
@@ -33,10 +32,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func testSafeReferenceHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
+func testVerifiedSetReferenceHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
 	prefixPattern := "SafeReferenceHandler - Test case: %s"
 	method := "POST"
-	path := "/v1/immurestproxy/safe/reference"
+	path := "/db/verified/setreference"
 	for _, tc := range safeReferenceHandlerTestCases(mux, ic) {
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 			tc.safeReferenceHandler.SafeReference(res, req, nil)
@@ -72,7 +71,12 @@ func safeReferenceHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClie
 	validRefKey := base64.StdEncoding.EncodeToString([]byte("safeReferenceKey1"))
 	validKey := base64.StdEncoding.EncodeToString([]byte("setKey1"))
 	validPayload := fmt.Sprintf(
-		"{\"ro\": {\"reference\": \"%s\", \"key\": \"%s\"}}",
+		`{
+				  "referenceRequest": {
+					"key": "%s",
+					"referencedKey": "%s"
+				  }
+				}`,
 		validRefKey,
 		validKey,
 	)
@@ -84,28 +88,35 @@ func safeReferenceHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClie
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusOK, status)
-				requireResponseFieldsTrue(t, testCase, []string{"verified"}, body)
 			},
 		},
 		{
 			"Sending correct request with non-existent key",
 			srh,
 			fmt.Sprintf(
-				"{\"ro\": {\"reference\": \"%s\", \"key\": \"%s\"}}",
+				`{
+				  "referenceRequest": {
+					"key": "%s",
+					"referencedKey": "%s"
+				  }
+				}`,
 				validRefKey,
 				base64.StdEncoding.EncodeToString([]byte("safeReferenceUnknownKey")),
 			),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusNotFound, status)
-				requireResponseFieldsEqual(
-					t, testCase, map[string]interface{}{"error": "Key not found"}, body)
 			},
 		},
 		{
 			"Sending incorrect json field",
 			srh,
 			fmt.Sprintf(
-				"{\"data\": {\"reference\": \"%s\", \"key\": \"%s\"}}",
+				`{
+				  "referenceRequ": {
+					"key": "%s",
+					"referencedKey": "%s"
+				  }
+				}`,
 				validRefKey,
 				validKey,
 			),
@@ -119,26 +130,34 @@ func safeReferenceHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClie
 			"Missing Key field",
 			srh,
 			fmt.Sprintf(
-				"{\"ro\": {\"reference\": \"%s\"}}",
+				`{
+				  "referenceRequest": {
+					"key": "%s"
+				  }
+				}`,
 				validRefKey,
 			),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
 				requireResponseFieldsEqual(
-					t, testCase, map[string]interface{}{"error": "invalid key"}, body)
+					t, testCase, map[string]interface{}{"error": "illegal arguments"}, body)
 			},
 		},
 		{
 			"Sending plain text instead of base64 encoded",
 			srh,
 			fmt.Sprintf(
-				"{\"ro\": {\"reference\": \"safeReferenceKey1\", \"key\": \"%s\"}}",
-				validKey,
+				`{
+				  "referenceRequest": {
+					"key": "myFirstKey",
+					"referencedKey": "myFirstReferencedKey"
+				  }
+				}`,
 			),
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
 				requireResponseFieldsEqual(
-					t, testCase, map[string]interface{}{"error": "illegal base64 data at input byte 16"}, body)
+					t, testCase, map[string]interface{}{"error": "illegal base64 data at input byte 8"}, body)
 			},
 		},
 		{
@@ -173,4 +192,3 @@ func safeReferenceHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClie
 		},
 	}
 }
-*/
