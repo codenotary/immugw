@@ -16,6 +16,7 @@ limitations under the License.
 package gw
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/codenotary/immudb/pkg/client"
@@ -25,6 +26,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -55,19 +57,21 @@ func TestGw(t *testing.T) {
 	testVerifiedZaddHandler(t, mux, immuClient)
 }
 
-/*func TestAuthGw(t *testing.T) {
+func TestAuthGw(t *testing.T) {
 	options := server.DefaultOptions().WithAuth(true)
 	bs := servertest.NewBufconnServer(options)
 
-	//bs.Start()
+	bs.Start()
 	defer bs.Stop()
 
 	defer os.RemoveAll(options.Dir)
 	defer os.Remove(".state-")
 
-	immuClient := newClient(bs.Dialer)
+	immuClient, _ := client.NewImmuClient(client.DefaultOptions().WithDialOptions(&[]grpc.DialOption{grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure()}).WithAuth(true))
 
-	ctx := context.Background()
+	mux := runtime.NewServeMux(runtime.WithProtoErrorHandler(runtime.DefaultHTTPError))
+
+	ctx := context.TODO()
 
 	dialOptions := []grpc.DialOption{
 		grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure(),
@@ -91,8 +95,8 @@ func TestGw(t *testing.T) {
 
 	require.NoError(t, immuClient.HealthCheck(ctx))
 	//mux := runtime.NewServeMux()
-	//testUseDatabaseHandler(t, ctx, mux, immuClient)
-}*/
+	testUseDatabaseHandler(t, ctx, mux, immuClient)
+}
 
 func testHandler(
 	t *testing.T,

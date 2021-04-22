@@ -15,7 +15,6 @@ limitations under the License.
 */
 package gw
 
-/*
 import (
 	"context"
 	"encoding/base64"
@@ -146,4 +145,3 @@ func useDatabaseHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient
 		},
 	}
 }
-*/
