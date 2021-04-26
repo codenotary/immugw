@@ -76,7 +76,7 @@ func (h *useDatabaseHandler) UseDatabase(w http.ResponseWriter, req *http.Reques
 		Databasename: databasename,
 	})
 	if err != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
 		return
 	}
 

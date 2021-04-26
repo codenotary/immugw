@@ -68,6 +68,9 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 	safeSetWErr := func(context.Context, []byte, []byte) (*schema.TxMetadata, error) {
 		return nil, errors.New("safeset error")
 	}
+	verifiedSetCorruptedDataErr := func(context.Context, []byte, []byte) (*schema.TxMetadata, error) {
+		return nil, errors.New("data is corrupted")
+	}
 	validKey := base64.StdEncoding.EncodeToString([]byte("safeSetKey1"))
 	validValue := base64.StdEncoding.EncodeToString([]byte("safeSetValue1"))
 	validPayload := fmt.Sprintf(
@@ -156,6 +159,16 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
 				requireResponseFieldsEqual(
 					t, testCase, map[string]interface{}{"error": "JSON marshal error"}, body)
+			},
+		},
+		{
+			"corrupted data",
+			NewVerifiedSetHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, VerifiedSetF: verifiedSetCorruptedDataErr}, rt, json),
+			validPayload,
+			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
+				requireResponseStatus(t, testCase, http.StatusConflict, status)
+				requireResponseFieldsEqual(
+					t, testCase, map[string]interface{}{"error": "data is corrupted"}, body)
 			},
 		},
 	}
