@@ -95,7 +95,7 @@ func (h *setHandler) Set(w http.ResponseWriter, req *http.Request, pathParams ma
 	msg, err := h.client.Set(rctx, protoReq.KVs[0].Key, protoReq.KVs[0].Value)
 	ctx = h.runtime.NewServerMetadataContext(rctx, metadata)
 	if err != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
 		return
 	}
 

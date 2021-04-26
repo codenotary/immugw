@@ -96,7 +96,7 @@ func (h *verifiedTxByIdHandler) VerifiedTxById(w http.ResponseWriter, req *http.
 	msg, err := h.client.VerifiedTxByID(rctx, protoReq.Tx)
 	ctx = h.runtime.NewServerMetadataContext(ctx, metadata)
 	if err != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
 		return
 	}
 

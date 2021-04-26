@@ -92,7 +92,7 @@ func (h *verifiedSetHandler) VerifiedSet(w http.ResponseWriter, req *http.Reques
 
 	msg, err := h.client.VerifiedSet(rctx, protoReq.SetRequest.KVs[0].Key, protoReq.SetRequest.KVs[0].Value)
 	if err != nil {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
 		return
 	}
 

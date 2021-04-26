@@ -20,11 +20,13 @@ import (
 	"errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"strings"
 )
 
 // sdk errors
 var (
-	ErrKeyNotFound = status.Error(codes.Unknown, "key not found")
+	ErrKeyNotFound   = status.Error(codes.Unknown, "key not found")
+	ErrCorruptedData = status.Error(codes.Aborted, "data is corrupted") // codes.Aborted is translated in StatusConflict 409 http error
 )
 
 var (
@@ -35,6 +37,8 @@ func mapSdkError(err error) error {
 	switch {
 	case errors.Is(err, ErrKeyNotFound):
 		return StatusErrKeyNotFound
+	case strings.HasPrefix(err.Error(), "data is corrupted"):
+		return ErrCorruptedData
 	}
 	return err
 }
