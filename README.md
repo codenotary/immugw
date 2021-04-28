@@ -178,18 +178,6 @@ docker build -t myown/immugw:latest -f Dockerfile .
 
 ![immugw communication explained](img/immugw-diagram.png)
 
-
-### immugw RESTful API reference
-
-You can find the swagger schema here:
-
-https://github.com/codenotary/immudb/blob/master/pkg/api/schema/schema.swagger.json
-
-If you want to run the Swagger UI, simply run the following docker command after you cloned this repo:
-
-```
-docker run -d -it -p 8081:8080 --name swagger-immugw -v ${PWD}/pkg/api/gw.schema.swagger.json/openapi.json -e SWAGGER_JSON=/openapi.json  swaggerapi/swagger-ui
-```
 ### CURL examples
 
 #### Login
