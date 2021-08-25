@@ -66,14 +66,14 @@ func (h *useDatabaseHandler) UseDatabase(w http.ResponseWriter, req *http.Reques
 		ok           bool
 	)
 
-	databasename, ok = pathParams["databasename"]
+	databasename, ok = pathParams["databaseName"]
 	if !ok {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "missing parameter %s", "key"))
 		return
 	}
 
 	msg, err := h.client.UseDatabase(rctx, &schema.Database{
-		Databasename: databasename,
+		DatabaseName: databasename,
 	})
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
