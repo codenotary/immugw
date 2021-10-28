@@ -39,11 +39,11 @@ func testUseDatabaseHandler(t *testing.T, ctx context.Context, mux *runtime.Serv
 	method := "GET"
 	md, _ := metadata.FromOutgoingContext(ctx)
 	for _, tc := range useDatabaseHandlerTestCases(mux, ic, ctx) {
-		path := "/v1/immurestproxy/usedatabase/" + tc.dbname
+		path := "/db/use/" + tc.dbname
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 			var pathParams map[string]string
 			if tc.dbname != "" {
-				pathParams = map[string]string{"databasename": tc.dbname}
+				pathParams = map[string]string{"databaseName": tc.dbname}
 			}
 			req.Header.Set("authorization", md.Get("authorization")[0])
 			tc.useDatabaseHandler.UseDatabase(res, req, pathParams)
@@ -78,8 +78,8 @@ func useDatabaseHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient
 	}
 	dbName := "dbtest"
 
-	err := ic.CreateDatabase(ctx, &schema.Database{
-		Databasename: dbName,
+	err := ic.CreateDatabase(ctx, &schema.DatabaseSettings{
+		DatabaseName: dbName,
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -110,7 +110,7 @@ func useDatabaseHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusBadRequest, status)
 				requireResponseFieldsEqual(
-					t, testCase, map[string]interface{}{"error": "missing parameter key"}, body)
+					t, testCase, map[string]interface{}{"message": "missing parameter key"}, body)
 			},
 		},
 		{
@@ -120,7 +120,7 @@ func useDatabaseHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
 				requireResponseFieldsEqual(
-					t, testCase, map[string]interface{}{"error": "annotate context error"}, body)
+					t, testCase, map[string]interface{}{"message": "annotate context error"}, body)
 			},
 		},
 		{
@@ -130,7 +130,7 @@ func useDatabaseHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
 				requireResponseFieldsEqual(
-					t, testCase, map[string]interface{}{"error": "useDatabase error"}, body)
+					t, testCase, map[string]interface{}{"message": "useDatabase error"}, body)
 			},
 		},
 		{
@@ -140,7 +140,7 @@ func useDatabaseHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
 				requireResponseFieldsEqual(
-					t, testCase, map[string]interface{}{"error": "JSON marshal error"}, body)
+					t, testCase, map[string]interface{}{"message": "JSON marshal error"}, body)
 			},
 		},
 	}

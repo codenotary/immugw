@@ -20,8 +20,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immudb/pkg/client/tokenservice"
 	"github.com/codenotary/immudb/pkg/server"
 	"github.com/codenotary/immudb/pkg/server/servertest"
+	"github.com/codenotary/immugw/pkg/api"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stretchr/testify/require"
@@ -45,7 +47,7 @@ func TestGw(t *testing.T) {
 	defer os.RemoveAll(options.Dir)
 	defer os.Remove(".state-")
 
-	immuClient, _ := client.NewImmuClient(client.DefaultOptions().WithDialOptions(&[]grpc.DialOption{grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure()}).WithAuth(false))
+	immuClient, _ := client.NewImmuClient(client.DefaultOptions().WithDialOptions([]grpc.DialOption{grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure()}).WithAuth(false))
 
 	mux := runtime.NewServeMux(runtime.WithProtoErrorHandler(runtime.DefaultHTTPError))
 
@@ -67,9 +69,9 @@ func TestAuthGw(t *testing.T) {
 	defer os.RemoveAll(options.Dir)
 	defer os.Remove(".state-")
 
-	immuClient, _ := client.NewImmuClient(client.DefaultOptions().WithDialOptions(&[]grpc.DialOption{grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure()}).WithAuth(true))
+	immuClient, _ := client.NewImmuClient(client.DefaultOptions().WithDialOptions([]grpc.DialOption{grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure()}).WithAuth(true))
 
-	mux := runtime.NewServeMux(runtime.WithProtoErrorHandler(runtime.DefaultHTTPError))
+	mux := runtime.NewServeMux(runtime.WithProtoErrorHandler(api.DefaultGWErrorHandler))
 
 	ctx := context.TODO()
 
@@ -79,10 +81,10 @@ func TestAuthGw(t *testing.T) {
 	pr := &PasswordReader{
 		Pass: []string{"immudb"},
 	}
-	ts := client.NewTokenService().WithTokenFileName("testTokenFile").WithHds(client.NewHomedirService())
-	cliopt := client.DefaultOptions().WithDialOptions(&dialOptions).WithPasswordReader(pr).WithTokenService(ts)
+	ts := tokenservice.NewInmemoryTokenService()
+	cliopt := client.DefaultOptions().WithDialOptions(dialOptions).WithPasswordReader(pr).WithTokenService(ts)
 	cliopt.PasswordReader = pr
-	cliopt.DialOptions = &dialOptions
+	cliopt.DialOptions = dialOptions
 
 	cli, _ := client.NewImmuClient(cliopt)
 	lresp, err := cli.Login(ctx, []byte("immudb"), []byte("immudb"))
@@ -94,7 +96,7 @@ func TestAuthGw(t *testing.T) {
 	ctx = metadata.NewOutgoingContext(context.Background(), md)
 
 	require.NoError(t, immuClient.HealthCheck(ctx))
-	//mux := runtime.NewServeMux()
+
 	testUseDatabaseHandler(t, ctx, mux, immuClient)
 }
 

@@ -21,13 +21,14 @@ import (
 	c "github.com/codenotary/immudb/cmd/helper"
 	"github.com/codenotary/immudb/cmd/version"
 	"github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immudb/pkg/client/homedir"
+	"github.com/codenotary/immudb/pkg/client/tokenservice"
 	"github.com/codenotary/immudb/pkg/logger"
 	"github.com/codenotary/immugw/cmd/immugw/command/service"
 	"github.com/codenotary/immugw/pkg/gw"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	daem "github.com/takama/daemon"
-	"google.golang.org/grpc"
 	"os"
 )
 
@@ -107,11 +108,10 @@ func (cl *Commandline) Immugw(immugwServer gw.ImmuGw) func(*cobra.Command, []str
 			WithMTLsOptions(options.MTLsOptions).
 			WithMaxRecvMsgSize(4 * 1024 * 1024).
 			WithAuth(true).
-			WithConfig("").
-			WithDialOptions(&[]grpc.DialOption{})
+			WithConfig("")
 
 		immuGwServer := immugwServer.
-			WithOptions(options).WithCliOptions(*cliOpts.WithTokenService(client.NewTokenService().WithHds(client.NewHomedirService())))
+			WithOptions(options).WithCliOptions(*cliOpts.WithTokenService(tokenservice.NewFileTokenService().WithHds(homedir.NewHomedirService())))
 		if options.Logfile != "" {
 			if flogger, file, err := logger.NewFileLogger("immugw ", options.Logfile); err == nil {
 				defer func() {
