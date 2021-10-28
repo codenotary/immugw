@@ -42,12 +42,11 @@ func TestImmuGwServer_Start(t *testing.T) {
 		WithPort(0).
 		WithAddress("").
 		WithHealthCheckRetries(1).
-		WithMTLs(options.MTLs).
 		WithMTLsOptions(client.MTLsOptions{}).
 		WithMaxRecvMsgSize(4 * 1024 * 1024).
 		WithAuth(true).
 		WithConfig("").
-		WithDialOptions(&[]grpc.DialOption{
+		WithDialOptions([]grpc.DialOption{
 			grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure(),
 		})
 
@@ -80,12 +79,11 @@ func TestImmuGwServer_StartWithAuditor(t *testing.T) {
 		WithPort(0).
 		WithAddress("").
 		WithHealthCheckRetries(1).
-		WithMTLs(options.MTLs).
 		WithMTLsOptions(client.MTLsOptions{}).
 		WithMaxRecvMsgSize(4 * 1024 * 1024).
 		WithAuth(true).
 		WithConfig("").
-		WithDialOptions(&[]grpc.DialOption{
+		WithDialOptions([]grpc.DialOption{
 			grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure(),
 		})
 
