@@ -30,7 +30,8 @@ var (
 )
 
 var (
-	StatusErrKeyNotFound = status.Error(codes.NotFound, "")
+	StatusErrKeyNotFound   = status.Error(codes.NotFound, "")
+	StatusDatabaseNotFound = status.Error(codes.NotFound, "")
 )
 
 func mapSdkError(err error) error {
