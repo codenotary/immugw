@@ -118,8 +118,8 @@ github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa/go.mod h1:z
 github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd/go.mod h1:sE/e/2PUdi/liOCUjSTXgM1o87ZssimdTWN964YiIeI=
 github.com/codenotary/daemon v0.0.0-20200507161650-3d4bcb5230f4 h1:5mhTmqO2f6QXPlIAGCEtCYR2MHNDLVkwaGWiSbffeQU=
 github.com/codenotary/daemon v0.0.0-20200507161650-3d4bcb5230f4/go.mod h1:PFDPquCi+3LI5PpAKS/8LvJBHTfkdsEXfGtANGx9hH4=
-github.com/codenotary/immudb v1.1.1-0.20211028130749-baecb53cb437 h1:nix2IXMyAsAPjvItO5IeDmQAwU6P6DJR373vOi0bfHs=
-github.com/codenotary/immudb v1.1.1-0.20211028130749-baecb53cb437/go.mod h1:7SV0EhQsNN8ma9E1ncMPW2kTgDrVU2KiWTiqUi6cgg8=
+github.com/codenotary/immudb v1.1.1-0.20211028150650-b4a3f7e7f277 h1:fKvDMhE/S7mpxTpHkTE/g530pSMrOHt7FaJqob18b2Y=
+github.com/codenotary/immudb v1.1.1-0.20211028150650-b4a3f7e7f277/go.mod h1:7SV0EhQsNN8ma9E1ncMPW2kTgDrVU2KiWTiqUi6cgg8=
 github.com/coreos/go-semver v0.2.0/go.mod h1:nnelYz7RCh+5ahJtPPxZlU+153eP4D4r3EedlOD2RNk=
 github.com/coreos/go-semver v0.3.0/go.mod h1:nnelYz7RCh+5ahJtPPxZlU+153eP4D4r3EedlOD2RNk=
 github.com/coreos/go-systemd v0.0.0-20180511133405-39ca1b05acc7/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
