@@ -315,8 +315,9 @@ curl --location --request POST '127.0.0.1:3323/db/sqlquery' \
 ```
 
 #### SQL Verifiable sql get
+Its possible also to tamperproof verify a SQL row.
 ```shell script
-curl --location --request POST '127.0.0.1:3323/db/verifiable/sqlget' \
+curl --location --request POST '127.0.0.1:3323/db/verified/row' \
 --header 'Authorization: v2.public.eyJkYXRhYmFzZSI6IjUiLCJleHAiOiIyMDIxLTEwLTI4VDE4OjU1OjAyKzAyOjAwIiwic3ViIjoiaW1tdWRiIn3-aNUXqydajYFR9Aa7-q40JepLuA0tsPXeR1nRo75jA1H45RZZU9Twt6EVi-4bS4gpzeQcRNEdJs8U5oM5urcM.aW1tdWRi' \
 --header 'Content-Type: application/json' \
 --data-raw '{
