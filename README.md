@@ -284,6 +284,81 @@ curl --location --request GET '127.0.0.1:3323/db/verified/tx/1' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: {{token}}'
 ```
+#### SQL Exec
+```shell script
+curl --location --request POST '127.0.0.1:3323/db/sqlexec' \
+--header 'Authorization: {{token}}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "sql":"CREATE TABLE mytable23 (id INTEGER, amount INTEGER, total INTEGER, title VARCHAR, content BLOB, isPresent BOOLEAN, PRIMARY KEY id)"
+}'
+```
+
+#### SQL Exec insert
+```shell script
+curl --location --request POST '127.0.0.1:3323/db/sqlexec' \
+--header 'Authorization: v2.public.eyJkYXRhYmFzZSI6IjUiLCJleHAiOiIyMDIxLTEwLTI4VDE4OjU1OjAyKzAyOjAwIiwic3ViIjoiaW1tdWRiIn3-aNUXqydajYFR9Aa7-q40JepLuA0tsPXeR1nRo75jA1H45RZZU9Twt6EVi-4bS4gpzeQcRNEdJs8U5oM5urcM.aW1tdWRi' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "sql":"INSERT INTO myTable23 (id, amount, title, content, isPresent) VALUES (2, 1000, '\''title 1'\'', x'\''626C6F6220636F6E74656E74'\'', true)"
+}'
+```
+> byte arrays need to be hex encoded
+#### SQL Query
+```shell script
+curl --location --request POST '127.0.0.1:3323/db/sqlquery' \
+--header 'Authorization: {{token}}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "sql":"SELECT * from mytable23;"
+}'
+```
+
+#### SQL Verifiable sql get
+```shell script
+curl --location --request POST '127.0.0.1:3323/db/verifiable/sqlget' \
+--header 'Authorization: v2.public.eyJkYXRhYmFzZSI6IjUiLCJleHAiOiIyMDIxLTEwLTI4VDE4OjU1OjAyKzAyOjAwIiwic3ViIjoiaW1tdWRiIn3-aNUXqydajYFR9Aa7-q40JepLuA0tsPXeR1nRo75jA1H45RZZU9Twt6EVi-4bS4gpzeQcRNEdJs8U5oM5urcM.aW1tdWRi' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "row": {
+            "columns": [
+                "(testdb1.mytable23.id)",
+                "(testdb1.mytable23.amount)",
+                "(testdb1.mytable23.total)",
+                "(testdb1.mytable23.title)",
+                "(testdb1.mytable23.content)",
+                "(testdb1.mytable23.ispresent)"
+            ]
+            },
+            "values": [
+                {
+                    "n": "2"
+                },
+                {
+                    "n": "1000"
+                },
+                {
+                    "null": null
+                },
+                {
+                     "s": "title 1"
+                },
+                {
+                    "bs": "YmxvYiBjb250ZW50"
+                },
+                {
+                    "b": true
+                }
+            ],
+        "table": "mytable23",
+        "pkValues": [
+            {
+                "n": "2"
+            }
+        ]
+      }'
+```
+> byte arrays need to be b64 encoded
 #### Logout
 ```shell script
 curl --location --request POST '127.0.0.1:3323/logout' \
