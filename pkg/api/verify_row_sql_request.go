@@ -7,13 +7,13 @@ import (
 	"strconv"
 )
 
-type VerifiableRowSQLRequest struct {
+type VerifyRowSQLRequest struct {
 	Row      *schema.Row
 	Table    string
 	PkValues []*schema.SQLValue
 }
 
-func (r *VerifiableRowSQLRequest) UnmarshalJSON(data []byte) (err error) {
+func (r *VerifyRowSQLRequest) UnmarshalJSON(data []byte) (err error) {
 	var obj map[string]*json.RawMessage
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
