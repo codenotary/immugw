@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. This projec
 ## [Unreleased]
 
 
+<a name="v1.1.0"></a>
+## [v1.1.0] - 2021-10-29
+### Features
+- add verified sql get and fix tests
+- **pkg/gw:** add immuerror server mux error handler
+
+
 <a name="v1.0.5"></a>
 ## [v1.0.5] - 2021-08-25
 ### Changes
@@ -44,6 +51,7 @@ All notable changes to this project will be documented in this file. This projec
 - **cmd/immugw:** add service management command
 
 
-[Unreleased]: https://github.com/vchain-us/immudb/compare/v1.0.5...HEAD
+[Unreleased]: https://github.com/vchain-us/immudb/compare/v1.1.0...HEAD
+[v1.1.0]: https://github.com/vchain-us/immudb/compare/v1.0.5...v1.1.0
 [v1.0.5]: https://github.com/vchain-us/immudb/compare/v0.9.2-RC1...v1.0.5
 [v0.9.2-RC1]: https://github.com/vchain-us/immudb/compare/v0.8.1...v0.9.2-RC1
