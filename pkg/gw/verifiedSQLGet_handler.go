@@ -64,7 +64,7 @@ func (h *verifiedSQLGetHandler) VerifiedSQLGetHandler(w http.ResponseWriter, req
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return
 	}
-	var protoReq api.VerifiableRowSQLRequest
+	var protoReq api.VerifyRowSQLRequest
 	var metadata runtime.ServerMetadata
 
 	//protoReq.PkValues = make([]*schema.SQLValue, 0)

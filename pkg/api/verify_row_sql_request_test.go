@@ -62,7 +62,7 @@ func TestVerifiableRowSQLRequest_UnmarshalJSON(t *testing.T) {
         ]
       }`)
 
-	var r VerifiableRowSQLRequest
+	var r VerifyRowSQLRequest
 	err := json.Unmarshal(jsonPayload, &r)
 	require.NoError(t, err)
 }
