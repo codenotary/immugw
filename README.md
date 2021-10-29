@@ -314,7 +314,7 @@ curl --location --request POST '127.0.0.1:3323/db/sqlquery' \
 }'
 ```
 
-#### SQL Verifiable sql get
+#### SQL Verified sql row
 Its possible also to tamperproof verify a SQL row.
 ```shell script
 curl --location --request POST '127.0.0.1:3323/db/verified/row' \
