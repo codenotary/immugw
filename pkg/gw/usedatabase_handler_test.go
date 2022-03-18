@@ -20,10 +20,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"google.golang.org/grpc/metadata"
 	"log"
 	"net/http"
 	"testing"
+
+	"google.golang.org/grpc/metadata"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/codenotary/immudb/pkg/client"
@@ -72,7 +73,7 @@ func useDatabaseHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient
 	rt := newDefaultRuntime()
 	defaultJSON := json.DefaultJSON()
 	hh := NewUseDatabaseHandler(mux, ic, rt, defaultJSON)
-	icd := client.DefaultClient()
+	icd, _ := client.NewImmuClient(client.DefaultOptions())
 	useDatabaseWErr := func(ctx context.Context, d *schema.Database) (*schema.UseDatabaseReply, error) {
 		return nil, errors.New("useDatabase error")
 	}

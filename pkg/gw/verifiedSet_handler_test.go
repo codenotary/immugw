@@ -20,9 +20,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/api/schema"
 	"net/http"
 	"testing"
+
+	"github.com/codenotary/immudb/pkg/api/schema"
 
 	"github.com/codenotary/immudb/pkg/client"
 	immuclient "github.com/codenotary/immudb/pkg/client"
@@ -64,11 +65,11 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 	rt := newDefaultRuntime()
 	json := json.DefaultJSON()
 	ssh := NewVerifiedSetHandler(mux, ic, rt, json)
-	icd := client.DefaultClient()
-	safeSetWErr := func(context.Context, []byte, []byte) (*schema.TxMetadata, error) {
+	icd, _ := client.NewImmuClient(client.DefaultOptions())
+	safeSetWErr := func(context.Context, []byte, []byte) (*schema.TxHeader, error) {
 		return nil, errors.New("safeset error")
 	}
-	verifiedSetCorruptedDataErr := func(context.Context, []byte, []byte) (*schema.TxMetadata, error) {
+	verifiedSetCorruptedDataErr := func(context.Context, []byte, []byte) (*schema.TxHeader, error) {
 		return nil, errors.New("data is corrupted")
 	}
 	validKey := base64.StdEncoding.EncodeToString([]byte("safeSetKey1"))

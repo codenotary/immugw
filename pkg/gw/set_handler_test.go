@@ -20,9 +20,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/api/schema"
 	"net/http"
 	"testing"
+
+	"github.com/codenotary/immudb/pkg/api/schema"
 
 	"github.com/codenotary/immudb/pkg/client"
 	immuclient "github.com/codenotary/immudb/pkg/client"
@@ -64,8 +65,9 @@ func setHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []setH
 	rt := newDefaultRuntime()
 	json := json.DefaultJSON()
 	sh := NewSetHandler(mux, ic, rt, json)
-	icd := client.DefaultClient()
-	setWErr := func(context.Context, []byte, []byte) (*schema.TxMetadata, error) {
+	icd, _ := client.NewImmuClient(client.DefaultOptions())
+
+	setWErr := func(context.Context, []byte, []byte) (*schema.TxHeader, error) {
 		return nil, errors.New("set error")
 	}
 

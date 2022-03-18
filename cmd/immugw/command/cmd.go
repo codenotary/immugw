@@ -17,6 +17,8 @@ limitations under the License.
 package immugw
 
 import (
+	"os"
+
 	"github.com/codenotary/immudb/cmd/docs/man"
 	c "github.com/codenotary/immudb/cmd/helper"
 	"github.com/codenotary/immudb/cmd/version"
@@ -29,7 +31,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	daem "github.com/takama/daemon"
-	"os"
 )
 
 func Execute() {
@@ -99,6 +100,9 @@ func (cl *Commandline) Immugw(immugwServer gw.ImmuGw) func(*cobra.Command, []str
 		if options, err = parseOptions(cmd); err != nil {
 			return err
 		}
+
+		options = options.WithTokenService(tokenservice.NewFileTokenService().WithHds(homedir.NewHomedirService()))
+
 		cliOpts := client.DefaultOptions().
 			WithDir(options.Dir).
 			WithPort(options.ImmudbPort).
@@ -110,8 +114,8 @@ func (cl *Commandline) Immugw(immugwServer gw.ImmuGw) func(*cobra.Command, []str
 			WithAuth(true).
 			WithConfig("")
 
-		immuGwServer := immugwServer.
-			WithOptions(options).WithCliOptions(*cliOpts.WithTokenService(tokenservice.NewFileTokenService().WithHds(homedir.NewHomedirService())))
+		immuGwServer := immugwServer.WithOptions(options).WithCliOptions(*cliOpts)
+
 		if options.Logfile != "" {
 			if flogger, file, err := logger.NewFileLogger("immugw ", options.Logfile); err == nil {
 				defer func() {
