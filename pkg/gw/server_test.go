@@ -16,15 +16,18 @@ limitations under the License.
 package gw
 
 import (
+	"os"
+	"testing"
+	"time"
+
 	"github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immudb/pkg/client/homedir"
+	"github.com/codenotary/immudb/pkg/client/tokenservice"
 	"github.com/codenotary/immudb/pkg/logger"
 	"github.com/codenotary/immudb/pkg/server"
 	"github.com/codenotary/immudb/pkg/server/servertest"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
-	"os"
-	"testing"
-	"time"
 )
 
 func TestImmuGwServer_Start(t *testing.T) {
@@ -51,8 +54,11 @@ func TestImmuGwServer_Start(t *testing.T) {
 		})
 
 	l := logger.NewSimpleLogger("test", os.Stdout)
+
+	gwOpts := Options{}.WithTokenService(tokenservice.NewFileTokenService().WithHds(homedir.NewHomedirService()))
+
 	gw := ImmuGwServer{
-		Options:      Options{},
+		Options:      gwOpts,
 		CliOptions:   *cliOpts,
 		Logger:       l,
 		quit:         make(chan struct{}, 1),
@@ -64,7 +70,6 @@ func TestImmuGwServer_Start(t *testing.T) {
 }
 
 func TestImmuGwServer_StartWithAuditor(t *testing.T) {
-
 	options := server.DefaultOptions().WithAuth(true)
 	bs := servertest.NewBufconnServer(options)
 
@@ -88,8 +93,13 @@ func TestImmuGwServer_StartWithAuditor(t *testing.T) {
 		})
 
 	l := logger.NewSimpleLogger("test", os.Stdout)
+
+	gwOpts := Options{}.WithAudit(true).
+		WithAuditInterval(5 * time.Millisecond).
+		WithTokenService(tokenservice.NewFileTokenService().WithHds(homedir.NewHomedirService()))
+
 	gw := ImmuGwServer{
-		Options:      Options{}.WithAudit(true).WithAuditInterval(5 * time.Millisecond),
+		Options:      gwOpts,
 		CliOptions:   *cliOpts,
 		Logger:       l,
 		quit:         make(chan struct{}, 1),
