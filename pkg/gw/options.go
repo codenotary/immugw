@@ -22,48 +22,50 @@ import (
 	"time"
 
 	"github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immudb/pkg/client/tokenservice"
 )
 
 // Options immudb gateway server options
 type Options struct {
-	Dir           string
-	Address       string
-	Port          int
-	MetricsPort   int
-	ImmudbAddress string
-	ImmudbPort    int
-	Audit         bool
-	AuditInterval time.Duration
-	AuditUsername string
-	AuditPassword string `json:"-"`
+	Dir            string
+	Address        string
+	Port           int
+	MetricsPort    int
+	ImmudbAddress  string
+	ImmudbPort     int
+	Audit          bool
+	AuditInterval  time.Duration
+	AuditUsername  string
+	AuditPassword  string `json:"-"`
 	AuditSignature string
-	Detached      bool
-	MTLs          bool
-	MTLsOptions   client.MTLsOptions
-	Config        string
-	Pidfile       string
-	Logfile       string
+	Detached       bool
+	MTLs           bool
+	MTLsOptions    client.MTLsOptions
+	Config         string
+	Pidfile        string
+	Logfile        string
+	TokenService   tokenservice.TokenService
 }
 
 // DefaultOptions ...
 func DefaultOptions() Options {
 	return Options{
-		Dir:           ".",
-		Address:       "0.0.0.0",
-		Port:          3323,
-		MetricsPort:   9476,
-		ImmudbAddress: "127.0.0.1",
-		ImmudbPort:    3322,
-		Audit:         false,
-		AuditInterval: 5 * time.Minute,
-		AuditUsername: "immugwauditor",
-		AuditPassword: "",
+		Dir:            ".",
+		Address:        "0.0.0.0",
+		Port:           3323,
+		MetricsPort:    9476,
+		ImmudbAddress:  "127.0.0.1",
+		ImmudbPort:     3322,
+		Audit:          false,
+		AuditInterval:  5 * time.Minute,
+		AuditUsername:  "immugwauditor",
+		AuditPassword:  "",
 		AuditSignature: "ignore",
-		Detached:      false,
-		MTLs:          false,
-		Config:        "configs/immugw.toml",
-		Pidfile:       "",
-		Logfile:       "",
+		Detached:       false,
+		MTLs:           false,
+		Config:         "configs/immugw.toml",
+		Pidfile:        "",
+		Logfile:        "",
 	}
 }
 
@@ -162,6 +164,11 @@ func (o Options) WithPidfile(pidfile string) Options {
 // WithLogfile sets logfile
 func (o Options) WithLogfile(logfile string) Options {
 	o.Logfile = logfile
+	return o
+}
+
+func (o Options) WithTokenService(tokenService tokenservice.TokenService) Options {
+	o.TokenService = tokenService
 	return o
 }
 

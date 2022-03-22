@@ -19,10 +19,6 @@ package gw
 import (
 	"context"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/client/auditor"
-	"github.com/codenotary/immudb/pkg/client/cache"
-	"github.com/codenotary/immudb/pkg/client/state"
-	"github.com/codenotary/immugw/pkg/api"
 	"net/http"
 	"os"
 	"os/signal"
@@ -30,6 +26,11 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/codenotary/immudb/pkg/client/auditor"
+	"github.com/codenotary/immudb/pkg/client/cache"
+	"github.com/codenotary/immudb/pkg/client/state"
+	"github.com/codenotary/immugw/pkg/api"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
 	immuclient "github.com/codenotary/immudb/pkg/client"
@@ -53,6 +54,9 @@ func (s *ImmuGwServer) Start() error {
 		s.Logger.Errorf("unable to instantiate client: %s", err)
 		return err
 	}
+
+	ic.WithTokenService(s.Options.TokenService)
+
 	mux := runtime.NewServeMux(runtime.WithProtoErrorHandler(api.DefaultGWErrorHandler))
 
 	handler := cors.Default().Handler(mux)

@@ -19,6 +19,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"strings"
+	"testing"
+
 	"github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/tokenservice"
 	"github.com/codenotary/immudb/pkg/server"
@@ -29,12 +36,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	"log"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"strings"
-	"testing"
 )
 
 func TestGw(t *testing.T) {
@@ -82,11 +83,13 @@ func TestAuthGw(t *testing.T) {
 		Pass: []string{"immudb"},
 	}
 	ts := tokenservice.NewInmemoryTokenService()
-	cliopt := client.DefaultOptions().WithDialOptions(dialOptions).WithPasswordReader(pr).WithTokenService(ts)
+	cliopt := client.DefaultOptions().WithDialOptions(dialOptions).WithPasswordReader(pr)
 	cliopt.PasswordReader = pr
 	cliopt.DialOptions = dialOptions
 
 	cli, _ := client.NewImmuClient(cliopt)
+	cli.WithTokenService(ts)
+
 	lresp, err := cli.Login(ctx, []byte("immudb"), []byte("immudb"))
 	if err != nil {
 		t.Fatal(err)

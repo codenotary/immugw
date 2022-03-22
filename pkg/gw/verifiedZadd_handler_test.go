@@ -20,9 +20,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/api/schema"
 	"net/http"
 	"testing"
+
+	"github.com/codenotary/immudb/pkg/api/schema"
 
 	"github.com/codenotary/immudb/pkg/client"
 	immuclient "github.com/codenotary/immudb/pkg/client"
@@ -64,8 +65,8 @@ func verifiedZaddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClien
 	rt := newDefaultRuntime()
 	json := json.DefaultJSON()
 	szh := NewVerifiedZaddHandler(mux, ic, rt, json)
-	icd := client.DefaultClient()
-	verifiedZaddWErr := func(context.Context, []byte, float64, []byte, uint64) (*schema.TxMetadata, error) {
+	icd, _ := client.NewImmuClient(client.DefaultOptions())
+	verifiedZaddWErr := func(context.Context, []byte, float64, []byte, uint64) (*schema.TxHeader, error) {
 		return nil, errors.New("verifiedZadd error")
 	}
 

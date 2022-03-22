@@ -64,7 +64,7 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 	rt := newDefaultRuntime()
 	defaultJSON := json.DefaultJSON()
 	hh := NewHistoryHandler(mux, ic, rt, defaultJSON)
-	icd := client.DefaultClient()
+	icd, _ := client.NewImmuClient(client.DefaultOptions())
 	historyWErr := func(context.Context, *schema.HistoryRequest) (*schema.Entries, error) {
 		return nil, errors.New("history error")
 	}

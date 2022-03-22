@@ -20,9 +20,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/api/schema"
 	"net/http"
 	"testing"
+
+	"github.com/codenotary/immudb/pkg/api/schema"
 
 	"github.com/codenotary/immudb/pkg/client"
 	immuclient "github.com/codenotary/immudb/pkg/client"
@@ -64,8 +65,8 @@ func safeReferenceHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClie
 	rt := newDefaultRuntime()
 	json := json.DefaultJSON()
 	srh := NewSafeReferenceHandler(mux, ic, rt, json)
-	icd := client.DefaultClient()
-	safeReferenceWErr := func(context.Context, []byte, []byte, uint64) (*schema.TxMetadata, error) {
+	icd, _ := client.NewImmuClient(client.DefaultOptions())
+	safeReferenceWErr := func(context.Context, []byte, []byte, uint64) (*schema.TxHeader, error) {
 		return nil, errors.New("safereference error")
 	}
 	validRefKey := base64.StdEncoding.EncodeToString([]byte("safeReferenceKey1"))
