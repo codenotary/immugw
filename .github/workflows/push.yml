@@ -5,13 +5,13 @@ jobs:
     name: Build
     strategy:
       matrix:
-        go-version: [1.13]
+        go-version: [1.18]
         platform: [ubuntu-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/setup-go@v1
         with:
-          go-version: 1.13
+          go-version: 1.18
       - uses: actions/checkout@v1
 
       - name: Build
@@ -25,13 +25,13 @@ jobs:
     name: Build
     strategy:
       matrix:
-        go-version: [1.13]
+        go-version: [1.18]
         platform: [windows-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/setup-go@v1
         with:
-          go-version: 1.13
+          go-version: 1.18
       - uses: actions/checkout@v1
 
       - name: Build

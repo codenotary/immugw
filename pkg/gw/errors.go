@@ -18,15 +18,23 @@ package gw
 
 import (
 	"errors"
+	"strings"
+
+	"github.com/codenotary/immudb/pkg/server"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"strings"
 )
 
 // sdk errors
 var (
 	ErrKeyNotFound   = status.Error(codes.Unknown, "key not found")
 	ErrCorruptedData = status.Error(codes.Aborted, "data is corrupted") // codes.Aborted is translated in StatusConflict 409 http error
+)
+
+// wrap server errors which are not constants in immudb
+var (
+	ErrIllegalArgument   = errors.New("illegal arguments: empty key")
+	ErrKeyNotFoundTBTree = errors.New("tbtree: key not found")
 )
 
 var (
@@ -40,6 +48,10 @@ func mapSdkError(err error) error {
 		return StatusErrKeyNotFound
 	case strings.HasPrefix(err.Error(), "data is corrupted"):
 		return ErrCorruptedData
+	case strings.HasSuffix(err.Error(), ErrIllegalArgument.Error()):
+		return server.ErrIllegalArguments
+	case strings.HasSuffix(err.Error(), ErrKeyNotFoundTBTree.Error()):
+		return StatusErrKeyNotFound
 	}
 	return err
 }
