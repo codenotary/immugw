@@ -1,5 +1,13 @@
-name: CI
-on: [push]
+name: pushCI
+
+on:
+  push:
+    branches:
+      - master
+      - release/v*
+    tags:
+      - 'v*'
+
 jobs:
   build-linux:
     name: Build
@@ -21,6 +29,7 @@ jobs:
         run: |
           make test
         shell: bash
+
   build-windows:
     name: Build
     strategy:
@@ -38,3 +47,68 @@ jobs:
         env:
           GO111MODULE: "on"
         run: make all
+
+  binaries:
+      name: Build binaries and notarize sources
+      needs:
+        - build-windows
+        - build-linux
+      runs-on: ubuntu-latest
+      env:
+        JOB_NAME: ${{ github.job }}
+        JOB_ID: ${{ github.run_id }}
+      outputs:
+        matrix: ${{ steps.list-binaries.outputs.matrix }}
+      steps:
+        - uses: actions/setup-go@v3
+          with:
+            go-version: ${{ env.GO_VERSION }}
+        - uses: actions/checkout@v3
+        - name: Build binaries
+          run: make dist
+        - id: list-binaries
+          run: |
+            echo "::set-output name=matrix::$(ls dist | jq -R -s -c 'split("\n")[:-1] | {binary: .}')"
+        - name: Upload binary artifacts
+          uses: actions/upload-artifact@v3
+          with:
+            name: immugw-binaries
+            path: dist
+            retention-days: 5
+        - name: Calculate checksums
+          run: make dist/binary.md
+
+  images:
+      name: Build and notarize Docker Images
+      needs:
+        - binaries
+      runs-on: ubuntu-latest
+      env:
+        JOB_NAME: ${{ github.job }}
+        JOB_ID: ${{ github.run_id }}
+        DOCKER_IMAGE_IMMUGW: "codenotary/immugw"
+        DOCKER_BUILDKIT: "1"
+      steps:
+        - uses: actions/checkout@v3
+        - name: Build docker images
+          shell: bash
+          run: |
+            if [[ "${GITHUB_REF}" =~ ^refs/tags/v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+              VERSION_TAG="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+              VERSION_TAG_SHORT="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+            fi
+
+            docker build --tag "${DOCKER_IMAGE_IMMUGW}:dev" -f Dockerfile .
+
+            docker login -u "${{ secrets.REGISTRY_USER }}" -p "${{ secrets.REGISTRY_PASS }}"
+
+            docker push "${DOCKER_IMAGE_IMMUGW}:dev"
+
+            if [[ ! -z "$VERSION_TAG" ]]; then
+              for tag in "${VERSION_TAG}" "${VERSION_TAG_SHORT}" "latest"; do
+                docker tag "${DOCKER_IMAGE_IMMUGW}:dev" "${DOCKER_IMAGE_IMMUGW}:${tag}"
+                docker push "${DOCKER_IMAGE_IMMUGW}:${tag}"
+              done
+            fi
+
+            docker logout

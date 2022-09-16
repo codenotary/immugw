@@ -100,4 +100,8 @@ dist/binary.md:
 		printf "[$$ff](https://github.com/codenotary/immugw/releases/download/v${VERSION}/$$ff) | $$shm_id \n" ; \
 	done
 
+.PHONY: dist
+dist: dist/binaries
+	@echo 'Binaries generation complete. Now vcn signature is needed.'
+
 ########################## releases scripts end ########################################################################

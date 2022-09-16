@@ -1,0 +1,25 @@
+name: pullCI
+
+on: [pull_request]
+
+jobs:
+  build:
+    name: build-and-test
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            go: "1.18"
+            test: true
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+
+      - uses: actions/checkout@v3
+
+      - name: Test
+        run: make test
+        if: matrix.test
