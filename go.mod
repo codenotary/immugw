@@ -3,7 +3,7 @@ module github.com/codenotary/immugw
 go 1.13
 
 require (
-	github.com/codenotary/immudb v1.3.2
+	github.com/codenotary/immudb v1.4.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/prometheus/client_golang v1.12.2
 	github.com/rs/cors v1.7.0
