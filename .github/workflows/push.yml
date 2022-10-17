@@ -100,7 +100,7 @@ jobs:
 
             docker build --tag "${DOCKER_IMAGE_IMMUGW}:dev" -f Dockerfile .
 
-            docker login -u "${{ secrets.REGISTRY_USER }}" -p "${{ secrets.REGISTRY_PASS }}"
+            docker login -u "${{ secrets.DOCKER_HUB_REGISTRY_USER }}" -p "${{ secrets.DOCKER_HUB_REGISTRY_PASS }}"
 
             docker push "${DOCKER_IMAGE_IMMUGW}:dev"
 
