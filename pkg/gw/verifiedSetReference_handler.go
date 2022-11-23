@@ -22,7 +22,7 @@ import (
 	"net/http"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immudb/pkg/client"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
@@ -37,13 +37,13 @@ type SafeReferenceHandler interface {
 
 type safeReferenceHandler struct {
 	mux     *runtime.ServeMux
-	client  client.ImmuClient
+	client  immugwclient.Client
 	runtime Runtime
 	json    json.JSON
 }
 
 // NewSafeReferenceHandler ...
-func NewSafeReferenceHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) SafeReferenceHandler {
+func NewSafeReferenceHandler(mux *runtime.ServeMux, client immugwclient.Client, rt Runtime, json json.JSON) SafeReferenceHandler {
 	return &safeReferenceHandler{
 		mux:     mux,
 		client:  client,
@@ -63,6 +63,17 @@ func (h *safeReferenceHandler) SafeReference(w http.ResponseWriter, req *http.Re
 		return
 	}
 
+	databasename, ok := pathParams["databaseName"]
+	if !ok {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "missing parameter %s", "databaseName"))
+		return
+	}
+	client, err := h.client.For(databasename)
+	if err != nil {
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, err)
+		return
+	}
+
 	var protoReq schema.VerifiableReferenceRequest
 	var metadata runtime.ServerMetadata
 
@@ -79,7 +90,7 @@ func (h *safeReferenceHandler) SafeReference(w http.ResponseWriter, req *http.Re
 		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "incorrect JSON payload"))
 		return
 	}
-	msg, err := h.client.VerifiedSetReferenceAt(rctx, protoReq.ReferenceRequest.Key, protoReq.ReferenceRequest.ReferencedKey, protoReq.ReferenceRequest.AtTx)
+	msg, err := client.VerifiedSetReferenceAt(rctx, protoReq.ReferenceRequest.Key, protoReq.ReferenceRequest.ReferencedKey, protoReq.ReferenceRequest.AtTx)
 	ctx = h.runtime.NewServerMetadataContext(ctx, metadata)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))

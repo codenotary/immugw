@@ -23,14 +23,17 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/codenotary/immudb/pkg/client"
+	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/tokenservice"
 	"github.com/codenotary/immudb/pkg/server"
 	"github.com/codenotary/immudb/pkg/server/servertest"
 	"github.com/codenotary/immugw/pkg/api"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stretchr/testify/require"
@@ -38,39 +41,57 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+var (
+	defaultTestParams = map[string]string{"databaseName": "defaultdb"}
+)
+
 func TestGw(t *testing.T) {
-	options := server.DefaultOptions().WithAuth(false)
+	options := server.DefaultOptions().WithAuth(false).WithDir(t.TempDir())
 	bs := servertest.NewBufconnServer(options)
 
 	bs.Start()
 	defer bs.Stop()
 
-	defer os.RemoveAll(options.Dir)
-	defer os.Remove(".state-")
+	defer func() {
+		matches, _ := filepath.Glob("state-*")
+		os.RemoveAll(options.Dir)
+		for _, m := range matches {
+			os.RemoveAll(m)
+		}
+	}()
 
-	immuClient, _ := client.NewImmuClient(client.DefaultOptions().WithDialOptions([]grpc.DialOption{grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure()}).WithAuth(false))
+	opts := client.DefaultOptions().WithDialOptions([]grpc.DialOption{grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure()}).WithAuth(false).WithDir(t.TempDir())
+	client := immugwclient.New(opts)
+	client.Add("defaultdb")
 
 	mux := runtime.NewServeMux(runtime.WithProtoErrorHandler(runtime.DefaultHTTPError))
 
-	testSafeSetHandler(t, mux, immuClient)
-	testSetHandler(t, mux, immuClient)
-	testSafeGetHandler(t, mux, immuClient)
-	testHistoryHandler(t, mux, immuClient)
-	testVerifiedSetReferenceHandler(t, mux, immuClient)
-	testVerifiedZaddHandler(t, mux, immuClient)
+	testSafeSetHandler(t, mux, client, opts)
+	testSetHandler(t, mux, client, opts)
+	testSafeGetHandler(t, mux, client, opts)
+	testHistoryHandler(t, mux, client, opts)
+	testVerifiedSetReferenceHandler(t, mux, client, opts)
+	testVerifiedZaddHandler(t, mux, client, opts)
 }
 
 func TestAuthGw(t *testing.T) {
-	options := server.DefaultOptions().WithAuth(true)
+	options := server.DefaultOptions().WithAuth(true).WithDir(t.TempDir())
 	bs := servertest.NewBufconnServer(options)
 
 	bs.Start()
 	defer bs.Stop()
 
-	defer os.RemoveAll(options.Dir)
-	defer os.Remove(".state-")
+	defer func() {
+		matches, _ := filepath.Glob("state-*")
+		os.RemoveAll(options.Dir)
+		for _, m := range matches {
+			os.RemoveAll(m)
+		}
+	}()
 
-	immuClient, _ := client.NewImmuClient(client.DefaultOptions().WithDialOptions([]grpc.DialOption{grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure()}).WithAuth(true))
+	opts := immuclient.DefaultOptions().WithDialOptions([]grpc.DialOption{grpc.WithContextDialer(bs.Dialer), grpc.WithInsecure()}).WithAuth(false).WithDir(t.TempDir())
+	client := immugwclient.New(opts)
+	immuClient, _ := client.Add("defaultdb")
 
 	mux := runtime.NewServeMux(runtime.WithProtoErrorHandler(api.DefaultGWErrorHandler))
 
@@ -83,11 +104,11 @@ func TestAuthGw(t *testing.T) {
 		Pass: []string{"immudb"},
 	}
 	ts := tokenservice.NewInmemoryTokenService()
-	cliopt := client.DefaultOptions().WithDialOptions(dialOptions).WithPasswordReader(pr)
+	cliopt := immuclient.DefaultOptions().WithDialOptions(dialOptions).WithPasswordReader(pr)
 	cliopt.PasswordReader = pr
 	cliopt.DialOptions = dialOptions
 
-	cli, _ := client.NewImmuClient(cliopt)
+	cli, _ := immuclient.NewImmuClient(cliopt)
 	cli.WithTokenService(ts)
 
 	lresp, err := cli.Login(ctx, []byte("immudb"), []byte("immudb"))
@@ -100,7 +121,7 @@ func TestAuthGw(t *testing.T) {
 
 	require.NoError(t, immuClient.HealthCheck(ctx))
 
-	testUseDatabaseHandler(t, ctx, mux, immuClient)
+	testUseDatabaseHandler(t, ctx, mux, client, opts)
 }
 
 func testHandler(

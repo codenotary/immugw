@@ -24,7 +24,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immudb/pkg/client"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc/codes"
@@ -38,14 +38,14 @@ type VerifiedTxByIdHandler interface {
 
 type verifiedTxByIdHandler struct {
 	mux     *runtime.ServeMux
-	client  client.ImmuClient
+	client  immugwclient.Client
 	runtime Runtime
 	json    json.JSON
 	sync.RWMutex
 }
 
 // NewVerifiedTxById ...
-func NewVerifiedTxByIdHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) VerifiedTxByIdHandler {
+func NewVerifiedTxByIdHandler(mux *runtime.ServeMux, client immugwclient.Client, rt Runtime, json json.JSON) VerifiedTxByIdHandler {
 	return &verifiedTxByIdHandler{
 		mux:     mux,
 		client:  client,
@@ -86,6 +86,17 @@ func (h *verifiedTxByIdHandler) VerifiedTxById(w http.ResponseWriter, req *http.
 		return
 	}
 
+	databasename, exists := pathParams["databaseName"]
+	if !exists {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "missing parameter %s", "key"))
+		return
+	}
+	client, err := h.client.For(databasename)
+	if err != nil {
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, err)
+		return
+	}
+
 	if err := req.ParseForm(); err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
 		return
@@ -94,7 +105,7 @@ func (h *verifiedTxByIdHandler) VerifiedTxById(w http.ResponseWriter, req *http.
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "%v", err))
 	}
 
-	msg, err := h.client.VerifiedTxByID(rctx, protoReq.Tx)
+	msg, err := client.VerifiedTxByID(rctx, protoReq.Tx)
 	ctx = h.runtime.NewServerMetadataContext(ctx, metadata)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))

@@ -24,22 +24,21 @@ import (
 	"testing"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
-
-	"github.com/codenotary/immudb/pkg/client"
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/clienttest"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stretchr/testify/require"
 )
 
-func testSafeSetHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
+func testSafeSetHandler(t *testing.T, mux *runtime.ServeMux, client immugwclient.Client, opts *immuclient.Options) {
 	prefixPattern := "SafeSetHandler - Test case: %s"
 	method := "POST"
-	path := "/db/verifiable/set"
-	for _, tc := range safeSetHandlerTestCases(mux, ic) {
+	path := "/db/defaultdb/verified/set"
+	for _, tc := range safeSetHandlerTestCases(mux, client, opts) {
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-			tc.verifiedSetHandler.VerifiedSet(res, req, nil)
+			tc.verifiedSetHandler.VerifiedSet(res, req, defaultTestParams)
 		}
 		err := testHandler(
 			t,
@@ -61,11 +60,11 @@ type safeSetHandlerTestCase struct {
 	testFunc           func(*testing.T, string, int, map[string]interface{})
 }
 
-func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []safeSetHandlerTestCase {
+func safeSetHandlerTestCases(mux *runtime.ServeMux, client immugwclient.Client, opts *immuclient.Options) []safeSetHandlerTestCase {
 	rt := newDefaultRuntime()
 	json := json.DefaultJSON()
-	ssh := NewVerifiedSetHandler(mux, ic, rt, json)
-	icd, _ := client.NewImmuClient(client.DefaultOptions())
+	ssh := NewVerifiedSetHandler(mux, client, rt, json)
+	icd, _ := immuclient.NewImmuClient(immuclient.DefaultOptions())
 	safeSetWErr := func(context.Context, []byte, []byte) (*schema.TxHeader, error) {
 		return nil, errors.New("safeset error")
 	}
@@ -134,7 +133,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"AnnotateContext error",
-			NewVerifiedSetHandler(mux, ic, newTestRuntimeWithAnnotateContextErr(), json),
+			NewVerifiedSetHandler(mux, client, newTestRuntimeWithAnnotateContextErr(), json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -144,7 +143,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"SafeSet error",
-			NewVerifiedSetHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, VerifiedSetF: safeSetWErr}, rt, json),
+			NewVerifiedSetHandler(mux, immugwclient.NewMockClient(&clienttest.ImmuClientMock{ImmuClient: icd, VerifiedSetF: safeSetWErr}, opts), rt, json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -154,7 +153,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"JSON marshal error",
-			NewVerifiedSetHandler(mux, ic, rt, newTestJSONWithMarshalErr()),
+			NewVerifiedSetHandler(mux, client, rt, newTestJSONWithMarshalErr()),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -164,7 +163,7 @@ func safeSetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"corrupted data",
-			NewVerifiedSetHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, VerifiedSetF: verifiedSetCorruptedDataErr}, rt, json),
+			NewVerifiedSetHandler(mux, immugwclient.NewMockClient(&clienttest.ImmuClientMock{ImmuClient: icd, VerifiedSetF: verifiedSetCorruptedDataErr}, opts), rt, json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusConflict, status)

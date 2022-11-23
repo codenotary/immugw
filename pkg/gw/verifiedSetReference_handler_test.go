@@ -25,21 +25,21 @@ import (
 
 	"github.com/codenotary/immudb/pkg/api/schema"
 
-	"github.com/codenotary/immudb/pkg/client"
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/clienttest"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stretchr/testify/require"
 )
 
-func testVerifiedSetReferenceHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
+func testVerifiedSetReferenceHandler(t *testing.T, mux *runtime.ServeMux, client immugwclient.Client, opts *immuclient.Options) {
 	prefixPattern := "SafeReferenceHandler - Test case: %s"
 	method := "POST"
-	path := "/db/verified/setreference"
-	for _, tc := range safeReferenceHandlerTestCases(mux, ic) {
+	path := "/db/defaultdb/verified/setreference"
+	for _, tc := range safeReferenceHandlerTestCases(mux, client, opts) {
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-			tc.safeReferenceHandler.SafeReference(res, req, nil)
+			tc.safeReferenceHandler.SafeReference(res, req, defaultTestParams)
 		}
 		err := testHandler(
 			t,
@@ -61,11 +61,11 @@ type safeReferenceHandlerTestCase struct {
 	testFunc             func(*testing.T, string, int, map[string]interface{})
 }
 
-func safeReferenceHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []safeReferenceHandlerTestCase {
+func safeReferenceHandlerTestCases(mux *runtime.ServeMux, client immugwclient.Client, opts *immuclient.Options) []safeReferenceHandlerTestCase {
 	rt := newDefaultRuntime()
 	json := json.DefaultJSON()
-	srh := NewSafeReferenceHandler(mux, ic, rt, json)
-	icd, _ := client.NewImmuClient(client.DefaultOptions())
+	srh := NewSafeReferenceHandler(mux, client, rt, json)
+	icd, _ := immuclient.NewImmuClient(immuclient.DefaultOptions())
 	safeReferenceWErr := func(context.Context, []byte, []byte, uint64) (*schema.TxHeader, error) {
 		return nil, errors.New("safereference error")
 	}
@@ -163,7 +163,7 @@ func safeReferenceHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClie
 		},
 		{
 			"AnnotateContext error",
-			NewSafeReferenceHandler(mux, ic, newTestRuntimeWithAnnotateContextErr(), json),
+			NewSafeReferenceHandler(mux, client, newTestRuntimeWithAnnotateContextErr(), json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -173,7 +173,7 @@ func safeReferenceHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClie
 		},
 		{
 			"SafeReference error",
-			NewSafeReferenceHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, VerifiedSetReferenceF: safeReferenceWErr}, rt, json),
+			NewSafeReferenceHandler(mux, immugwclient.NewMockClient(&clienttest.ImmuClientMock{ImmuClient: icd, VerifiedSetReferenceF: safeReferenceWErr}, opts), rt, json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -183,7 +183,7 @@ func safeReferenceHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClie
 		},
 		{
 			"JSON marshal error",
-			NewSafeReferenceHandler(mux, ic, rt, newTestJSONWithMarshalErr()),
+			NewSafeReferenceHandler(mux, client, rt, newTestJSONWithMarshalErr()),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)

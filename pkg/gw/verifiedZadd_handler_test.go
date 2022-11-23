@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package gw
 
 import (
@@ -25,21 +26,21 @@ import (
 
 	"github.com/codenotary/immudb/pkg/api/schema"
 
-	"github.com/codenotary/immudb/pkg/client"
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/clienttest"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stretchr/testify/require"
 )
 
-func testVerifiedZaddHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
+func testVerifiedZaddHandler(t *testing.T, mux *runtime.ServeMux, client immugwclient.Client, opts *immuclient.Options) {
 	prefixPattern := "VerifiedZaddHandler - Test case: %s"
 	method := "POST"
-	path := "/db/verified/zadd"
-	for _, tc := range verifiedZaddHandlerTestCases(mux, ic) {
+	path := "/db/defaultdb/verified/zadd"
+	for _, tc := range verifiedZaddHandlerTestCases(mux, client, opts) {
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-			tc.verifiedZaddHandler.VerifiedZadd(res, req, nil)
+			tc.verifiedZaddHandler.VerifiedZadd(res, req, defaultTestParams)
 		}
 		err := testHandler(
 			t,
@@ -61,11 +62,11 @@ type verifiedZaddHandlerTestCase struct {
 	testFunc            func(*testing.T, string, int, map[string]interface{})
 }
 
-func verifiedZaddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []verifiedZaddHandlerTestCase {
+func verifiedZaddHandlerTestCases(mux *runtime.ServeMux, client immugwclient.Client, opts *immuclient.Options) []verifiedZaddHandlerTestCase {
 	rt := newDefaultRuntime()
 	json := json.DefaultJSON()
-	szh := NewVerifiedZaddHandler(mux, ic, rt, json)
-	icd, _ := client.NewImmuClient(client.DefaultOptions())
+	szh := NewVerifiedZaddHandler(mux, client, rt, json)
+	icd, _ := immuclient.NewImmuClient(immuclient.DefaultOptions())
 	verifiedZaddWErr := func(context.Context, []byte, float64, []byte, uint64) (*schema.TxHeader, error) {
 		return nil, errors.New("verifiedZadd error")
 	}
@@ -175,7 +176,7 @@ func verifiedZaddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClien
 		},
 		{
 			"AnnotateContext error",
-			NewVerifiedZaddHandler(mux, ic, newTestRuntimeWithAnnotateContextErr(), json),
+			NewVerifiedZaddHandler(mux, client, newTestRuntimeWithAnnotateContextErr(), json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -185,7 +186,7 @@ func verifiedZaddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClien
 		},
 		{
 			"VerifiedZadd error",
-			NewVerifiedZaddHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, VerifiedZAddF: verifiedZaddWErr}, rt, json),
+			NewVerifiedZaddHandler(mux, immugwclient.NewMockClient(&clienttest.ImmuClientMock{ImmuClient: icd, VerifiedZAddF: verifiedZaddWErr}, opts), rt, json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -195,7 +196,7 @@ func verifiedZaddHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClien
 		},
 		{
 			"JSON marshal error",
-			NewVerifiedZaddHandler(mux, ic, rt, newTestJSONWithMarshalErr()),
+			NewVerifiedZaddHandler(mux, client, rt, newTestJSONWithMarshalErr()),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)

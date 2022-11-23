@@ -18,10 +18,12 @@ package gw
 
 import (
 	"context"
-	"github.com/codenotary/immudb/pkg/api/schema"
 	"net/http"
 
-	"github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immudb/pkg/api/schema"
+	immuclient "github.com/codenotary/immudb/pkg/client"
+
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc/codes"
@@ -35,13 +37,13 @@ type UseDatabaseHandler interface {
 
 type useDatabaseHandler struct {
 	mux     *runtime.ServeMux
-	client  client.ImmuClient
+	client  immugwclient.Client
 	runtime Runtime
 	json    json.JSON
 }
 
 // NewUseDatabaseHandler ...
-func NewUseDatabaseHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) UseDatabaseHandler {
+func NewUseDatabaseHandler(mux *runtime.ServeMux, client immugwclient.Client, rt Runtime, json json.JSON) UseDatabaseHandler {
 	return &useDatabaseHandler{
 		mux:     mux,
 		client:  client,
@@ -53,6 +55,12 @@ func NewUseDatabaseHandler(mux *runtime.ServeMux, client client.ImmuClient, rt R
 func (h *useDatabaseHandler) UseDatabase(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 	ctx, cancel := context.WithCancel(req.Context())
 	defer cancel()
+
+	var (
+		err    error
+		client immuclient.ImmuClient
+	)
+
 	_, outboundMarshaler := h.runtime.MarshalerForRequest(h.mux, req)
 	rctx, err := h.runtime.AnnotateContext(ctx, h.mux, req)
 	if err != nil {
@@ -72,9 +80,17 @@ func (h *useDatabaseHandler) UseDatabase(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	msg, err := h.client.UseDatabase(rctx, &schema.Database{
-		DatabaseName: databasename,
-	})
+	client, err = h.client.For(databasename)
+	if err == immugwclient.ErrDatabaseNotFound {
+		var err error
+		client, err = h.client.Add(databasename)
+		if err != nil {
+			h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
+			return
+		}
+	}
+
+	msg, err := client.UseDatabase(rctx, &schema.Database{DatabaseName: databasename})
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
 		return

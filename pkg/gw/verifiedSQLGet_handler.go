@@ -18,12 +18,13 @@ package gw
 
 import (
 	"context"
-	"github.com/codenotary/immugw/pkg/api"
 	"io"
 	"net/http"
 	"sync"
 
-	"github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immugw/pkg/api"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
+
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
@@ -38,14 +39,14 @@ type VerifiedSQLGetHandler interface {
 
 type verifiedSQLGetHandler struct {
 	mux     *runtime.ServeMux
-	client  client.ImmuClient
+	client  immugwclient.Client
 	runtime Runtime
 	json    json.JSON
 	sync.RWMutex
 }
 
 // NewVerifiedSQLGetHandler ...
-func NewVerifiedSQLGetHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) VerifiedSQLGetHandler {
+func NewVerifiedSQLGetHandler(mux *runtime.ServeMux, client immugwclient.Client, rt Runtime, json json.JSON) VerifiedSQLGetHandler {
 	return &verifiedSQLGetHandler{
 		mux:     mux,
 		client:  client,
@@ -64,6 +65,18 @@ func (h *verifiedSQLGetHandler) VerifiedSQLGetHandler(w http.ResponseWriter, req
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
 		return
 	}
+
+	databasename, ok := pathParams["databaseName"]
+	if !ok {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "missing parameter %s", "databaseName"))
+		return
+	}
+	client, err := h.client.For(databasename)
+	if err != nil {
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, err)
+		return
+	}
+
 	var protoReq api.VerifyRowSQLRequest
 	var metadata runtime.ServerMetadata
 
@@ -78,7 +91,7 @@ func (h *verifiedSQLGetHandler) VerifiedSQLGetHandler(w http.ResponseWriter, req
 		return
 	}
 
-	err = h.client.VerifyRow(rctx, protoReq.Row, protoReq.Table, protoReq.PkValues)
+	err = client.VerifyRow(rctx, protoReq.Row, protoReq.Table, protoReq.PkValues)
 	ctx = h.runtime.NewServerMetadataContext(ctx, metadata)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))

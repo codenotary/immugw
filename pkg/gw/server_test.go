@@ -17,6 +17,7 @@ package gw
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -37,8 +38,13 @@ func TestImmuGwServer_Start(t *testing.T) {
 	bs.Start()
 	defer bs.Stop()
 
-	defer os.RemoveAll(options.Dir)
-	defer os.Remove(".state-")
+	defer func() {
+		matches, _ := filepath.Glob("state-*")
+		os.RemoveAll(options.Dir)
+		for _, m := range matches {
+			os.RemoveAll(m)
+		}
+	}()
 
 	cliOpts := client.DefaultOptions().
 		WithDir(options.Dir).
@@ -76,8 +82,13 @@ func TestImmuGwServer_StartWithAuditor(t *testing.T) {
 	bs.Start()
 	defer bs.Stop()
 
-	defer os.RemoveAll(options.Dir)
-	defer os.Remove(".state-")
+	defer func() {
+		matches, _ := filepath.Glob("state-*")
+		os.RemoveAll(options.Dir)
+		for _, m := range matches {
+			os.RemoveAll(m)
+		}
+	}()
 
 	cliOpts := client.DefaultOptions().
 		WithDir(options.Dir).
