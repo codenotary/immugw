@@ -18,9 +18,10 @@ package gw
 
 import (
 	"context"
-	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 	"net/http"
 	"sync"
+
+	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/codenotary/immudb/pkg/client"
