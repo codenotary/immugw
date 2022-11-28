@@ -1,5 +1,5 @@
 /*
-Copyright 2021 CodeNotary, Inc. All rights reserved.
+Copyright 2022 CodeNotary, Inc. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -936,140 +936,110 @@ func request_ImmuService_VerifiableSQLGet_0(ctx context.Context, marshaler runti
 // "immugwclient.Client" to call the correct interceptors.
 func RegisterImmuServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, gwclient immugwclient.Client, defaultClient schema.ImmuServiceClient) error {
 
-	// mux.Handle("GET", api.Pattern_ImmuService_ListUsers_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	mux.Handle("GET", api.Pattern_ImmuService_ListUsers_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		resp, md, err := request_ImmuService_ListUsers_0(rctx, inboundMarshaler, defaultClient, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	resp, md, err := request_ImmuService_ListUsers_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		forward_ImmuService_ListUsers_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// 	forward_ImmuService_ListUsers_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 
-	// })
+	mux.Handle("POST", api.Pattern_ImmuService_CreateUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// mux.Handle("POST", api.Pattern_ImmuService_CreateUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		resp, md, err := request_ImmuService_CreateUser_0(rctx, inboundMarshaler, defaultClient, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		forward_ImmuService_CreateUser_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// 	resp, md, err := request_ImmuService_CreateUser_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	})
 
-	// 	forward_ImmuService_CreateUser_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	mux.Handle("POST", api.Pattern_ImmuService_ChangePassword_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// })
+		resp, md, err := request_ImmuService_ChangePassword_0(rctx, inboundMarshaler, defaultClient, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// mux.Handle("POST", api.Pattern_ImmuService_ChangePassword_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		forward_ImmuService_ChangePassword_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	})
 
-	// 	resp, md, err := request_ImmuService_ChangePassword_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	mux.Handle("POST", api.Pattern_ImmuService_ChangePermission_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	forward_ImmuService_ChangePassword_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		resp, md, err := request_ImmuService_ChangePermission_0(rctx, inboundMarshaler, defaultClient, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// })
+		forward_ImmuService_ChangePermission_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// mux.Handle("POST", api.Pattern_ImmuService_ChangePermission_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	})
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	mux.Handle("POST", api.Pattern_ImmuService_SetActiveUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	resp, md, err := request_ImmuService_ChangePermission_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		resp, md, err := request_ImmuService_SetActiveUser_0(rctx, inboundMarshaler, defaultClient, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	forward_ImmuService_ChangePermission_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ImmuService_SetActiveUser_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// })
-
-	// mux.Handle("POST", api.Pattern_ImmuService_SetActiveUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
-
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
-
-	// 	resp, md, err := request_ImmuService_SetActiveUser_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
-
-	// 	forward_ImmuService_SetActiveUser_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	// })
+	})
 
 	mux.Handle("POST", api.Pattern_ImmuService_Login_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -1140,32 +1110,32 @@ func RegisterImmuServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
-	// mux.Handle("GET", api.Pattern_ImmuService_Get_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	mux.Handle("GET", api.Pattern_ImmuService_Get_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		client, err := getClientForDb(pathParams, gwclient)
+		if err != nil {
+			runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	resp, md, err := request_ImmuService_Get_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		resp, md, err := request_ImmuService_Get_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	forward_ImmuService_Get_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ImmuService_Get_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// })
+	})
 
 	mux.Handle("POST", api.Pattern_ImmuService_Delete_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -1275,32 +1245,32 @@ func RegisterImmuServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
-	// mux.Handle("GET", api.Pattern_ImmuService_Count_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	mux.Handle("GET", api.Pattern_ImmuService_Count_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		client, err := getClientForDb(pathParams, gwclient)
+		if err != nil {
+			runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	resp, md, err := request_ImmuService_Count_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		resp, md, err := request_ImmuService_Count_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	forward_ImmuService_Count_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ImmuService_Count_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// })
+	})
 
 	mux.Handle("GET", api.Pattern_ImmuService_CountAll_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -1329,32 +1299,32 @@ func RegisterImmuServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
-	// mux.Handle("GET", api.Pattern_ImmuService_TxById_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	mux.Handle("GET", api.Pattern_ImmuService_TxById_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		client, err := getClientForDb(pathParams, gwclient)
+		if err != nil {
+			runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	resp, md, err := request_ImmuService_TxById_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		resp, md, err := request_ImmuService_TxById_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	forward_ImmuService_TxById_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ImmuService_TxById_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// })
+	})
 
 	mux.Handle("POST", api.Pattern_ImmuService_TxScan_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())

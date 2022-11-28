@@ -20,5 +20,11 @@ import (
 	"testing"
 )
 
-func Test_clients_Add(t *testing.T) {
+func Test_client_add(t *testing.T) {
+}
+
+func Test_client_concurrent_access(t *testing.T) {
+}
+
+func Test_client_concurrent_operation(t *testing.T) {
 }
