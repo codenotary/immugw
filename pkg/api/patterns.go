@@ -96,7 +96,7 @@ func Pattern_ImmuService_VerifiedTxById_0() runtime.Pattern {
 	return runtime.MustPattern(runtime.NewPattern(
 		1,
 		[]int{
-			int(utilities.OpLitPush), 0,
+			int(utilities.OpLitPush), 0, // 2, 0, 1, 0, 4, 1, 5, 1, 2, 2
 			int(utilities.OpPush), 0,
 			int(utilities.OpConcatN), 1,
 			int(utilities.OpCapture), 1,
@@ -130,3 +130,93 @@ func Pattern_ImmuService_VerifiableSQLGet_0() runtime.Pattern {
 			runtime.AssumeColonVerbOpt(true)),
 	)
 }
+
+// default handlers
+
+var (
+	// Pattern_ImmuService_ListUsers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user", "list"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_CreateUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"user"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_ChangePassword_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"user", "password", "change"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_ChangePermission_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user", "changepermission"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_SetActiveUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user", "setactiveUser"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_Login_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"login"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_Logout_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"logout"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_Set_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "set"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"db", "databaseName", "get", "key"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "delete"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_GetAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "getall"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_ExecAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "execall"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_Scan_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "scan"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_Count_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"db", "databaseName", "count", "prefix"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_CountAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "countall"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_TxById_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 1}, []string{"db", "databaseName", "tx"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_TxScan_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "tx"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_History_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "history"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_ServerInfo_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"serverinfo"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_Health_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"health"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_DatabaseHealth_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "health"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_CurrentState_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "state"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_SetReference_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "setreference"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_ZAdd_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "zadd"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_ZScan_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "zscan"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_CreateDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "create"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_CreateDatabaseWith_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "createwith"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_CreateDatabaseV2_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"db", "databaseName", "create", "v2"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_LoadDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "load"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_UnloadDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "unload"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_DeleteDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "delete"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_DatabaseList_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "list"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_DatabaseListV2_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"db", "databaseName", "list", "v2"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_UpdateDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "update"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_UpdateDatabaseV2_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"db", "databaseName", "update", "v2"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_GetDatabaseSettings_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "settings"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_GetDatabaseSettingsV2_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"db", "databaseName", "settings", "v2"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_FlushIndex_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "flushindex"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_CompactIndex_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "compactindex"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_SQLExec_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "sqlexec"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_SQLQuery_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "sqlquery"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	// Pattern_ImmuService_ListTables_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"db", "databaseName", "table", "list"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	Pattern_ImmuService_DescribeTable_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"db", "databaseName", "tables"}, "", runtime.AssumeColonVerbOpt(true)))
+)

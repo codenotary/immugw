@@ -76,17 +76,17 @@ func (s *ImmuGwServer) Start() error {
 	tx := NewVerifiedTxByIdHandler(mux, client, rt, json)
 	vsql := NewVerifiedSQLGetHandler(mux, client, rt, json)
 
-	mux.Handle(http.MethodPost, schema.Pattern_ImmuService_Set_0(), sh.Set)
+	mux.Handle(http.MethodPost, api.Pattern_ImmuService_Set_0, sh.Set)
 	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedSet_0(), ssh.VerifiedSet)
 	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedGet_0(), sgh.VerifiedGet)
-	mux.Handle(http.MethodPost, schema.Pattern_ImmuService_History_0(), hh.History)
+	mux.Handle(http.MethodPost, api.Pattern_ImmuService_History_0, hh.History)
 	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedSetReference_0(), sr.SafeReference)
 	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedZAdd_0(), sza.VerifiedZadd)
 	mux.Handle(http.MethodGet, schema.Pattern_ImmuService_UseDatabase_0(), udb.UseDatabase)
 	mux.Handle(http.MethodGet, api.Pattern_ImmuService_VerifiedTxById_0(), tx.VerifiedTxById)
 	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiableSQLGet_0(), vsql.VerifiedSQLGetHandler)
 
-	err = schema.RegisterImmuServiceHandlerClient(ctx, mux, ic.GetServiceClient())
+	err = RegisterImmuServiceHandlerClient(ctx, mux, client, ic.GetServiceClient())
 	if err != nil {
 		s.Logger.Errorf("unable to register client handlers: %s", err)
 		return err
