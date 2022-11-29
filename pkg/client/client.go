@@ -18,6 +18,7 @@ package client
 
 import (
 	"fmt"
+	"path/filepath"
 	"sync"
 
 	immuclient "github.com/codenotary/immudb/pkg/client"
@@ -63,8 +64,8 @@ func (c *client) Add(db string) (immuclient.ImmuClient, error) {
 	}
 
 	// create state dir for db
-	dir := fmt.Sprintf("state-%s", db)
 	opts := *c.opts
+	dir := filepath.Join(opts.Dir, fmt.Sprintf("state-%s", db))
 	opts.WithDir(dir).WithDatabase(db)
 
 	// create new client
