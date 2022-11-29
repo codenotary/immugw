@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2020 vChain, Inc.
+Copyright 2022 CodeNotary, Inc. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// api errors
 var (
+	// ErrDatabaseNotFound is returned when a database is not found
 	ErrDatabaseNotFound = status.Error(codes.NotFound, "database is not initialised")
 )
 
@@ -37,42 +37,54 @@ func New(options *immuclient.Options) Client {
 	return newClient(options)
 }
 
+// newClient returns a new Client for defaultdb to the immudb server
 func newClient(opts *immuclient.Options) *client {
 	return &client{
-		opts:   opts,
-		dbList: make(map[string]immuclient.ImmuClient),
+		opts:  opts,
+		dbMap: make(map[string]immuclient.ImmuClient),
 	}
 }
 
+// client implementa Client interface
 type client struct {
-	mu     sync.RWMutex
-	opts   *immuclient.Options
-	dbList map[string]immuclient.ImmuClient
+	mu    sync.RWMutex
+	opts  *immuclient.Options
+	dbMap map[string]immuclient.ImmuClient
 }
 
-// Add adds a client connection for database db to the immudb server
+// Add adds a new database to the client
 func (c *client) Add(db string) (immuclient.ImmuClient, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	// check if db already exists
+	if cli, ok := c.dbMap[db]; ok {
+		return cli, nil
+	}
+
+	// create state dir for db
 	dir := fmt.Sprintf("state-%s", db)
 	opts := *c.opts
-	opts.WithDir(dir)
+	opts.WithDir(dir).WithDatabase(db)
 
+	// create new client
 	cli, err := immuclient.NewImmuClient(&opts)
 	if err != nil {
 		return nil, err
 	}
-	c.dbList[db] = cli
+
+	// add client to map
+	c.dbMap[db] = cli
 	return cli, nil
 }
 
-// For returns the client for database db to the immudb server
+// For returns the client connection for database db
 func (c *client) For(db string) (immuclient.ImmuClient, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	v, ok := c.dbList[db]
+	// check if db exists
+	v, ok := c.dbMap[db]
 	if !ok {
 		return nil, ErrDatabaseNotFound
 	}
@@ -83,7 +95,7 @@ func (c *client) For(db string) (immuclient.ImmuClient, error) {
 func NewMockClient(cli immuclient.ImmuClient, opts *immuclient.Options) Client {
 	return &client{
 		opts: opts,
-		dbList: map[string]immuclient.ImmuClient{
+		dbMap: map[string]immuclient.ImmuClient{
 			"defaultdb": cli,
 		},
 	}
@@ -93,7 +105,7 @@ func NewMockClient(cli immuclient.ImmuClient, opts *immuclient.Options) Client {
 func NewMockClientWithDb(cli immuclient.ImmuClient, opts *immuclient.Options, db string) Client {
 	return &client{
 		opts: opts,
-		dbList: map[string]immuclient.ImmuClient{
+		dbMap: map[string]immuclient.ImmuClient{
 			db: cli,
 		},
 	}

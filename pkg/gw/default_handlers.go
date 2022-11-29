@@ -45,6 +45,7 @@ var _ = utilities.NewDoubleArray
 var _ = descriptor.ForMessage
 var _ = metadata.Join
 
+// getClientForDb returns a client for the given database
 func getClientForDb(pathParams map[string]string, gwclient immugwclient.Client) (schema.ImmuServiceClient, error) {
 	databasename, ok := pathParams["databaseName"]
 	if !ok {
@@ -57,6 +58,7 @@ func getClientForDb(pathParams map[string]string, gwclient immugwclient.Client) 
 	return cli.GetServiceClient(), nil
 }
 
+// request_ImmuService_ListUsers_0 is the handler for method ListUsers on the database
 func request_ImmuService_ListUsers_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq empty.Empty
 	var metadata runtime.ServerMetadata
@@ -66,6 +68,7 @@ func request_ImmuService_ListUsers_0(ctx context.Context, marshaler runtime.Mars
 
 }
 
+// request_ImmuService_CreateUser_0 is the handler for method CreateUser on the database
 func request_ImmuService_CreateUser_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.CreateUserRequest
 	var metadata runtime.ServerMetadata
@@ -83,6 +86,7 @@ func request_ImmuService_CreateUser_0(ctx context.Context, marshaler runtime.Mar
 
 }
 
+// request_ImmuService_ChangePassword_0 is the handler for method ChangePassword on the database
 func request_ImmuService_ChangePassword_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.ChangePasswordRequest
 	var metadata runtime.ServerMetadata
@@ -100,6 +104,7 @@ func request_ImmuService_ChangePassword_0(ctx context.Context, marshaler runtime
 
 }
 
+// request_ImmuService_ChangePermission_0 is the handler for method ChangePermission on the database
 func request_ImmuService_ChangePermission_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.ChangePermissionRequest
 	var metadata runtime.ServerMetadata
@@ -117,6 +122,7 @@ func request_ImmuService_ChangePermission_0(ctx context.Context, marshaler runti
 
 }
 
+// request_ImmuService_SetActiveUser_0 is the handler for method SetActiveUser on the database
 func request_ImmuService_SetActiveUser_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.SetActiveUserRequest
 	var metadata runtime.ServerMetadata
@@ -134,6 +140,7 @@ func request_ImmuService_SetActiveUser_0(ctx context.Context, marshaler runtime.
 
 }
 
+// request_ImmuService_Login_0 is the handler for method Login on the database
 func request_ImmuService_Login_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.LoginRequest
 	var metadata runtime.ServerMetadata
@@ -151,6 +158,7 @@ func request_ImmuService_Login_0(ctx context.Context, marshaler runtime.Marshale
 
 }
 
+// request_ImmuService_Logout_0 is the handler for method Logout on the database
 func request_ImmuService_Logout_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq empty.Empty
 	var metadata runtime.ServerMetadata
@@ -168,6 +176,7 @@ func request_ImmuService_Logout_0(ctx context.Context, marshaler runtime.Marshal
 
 }
 
+// request_ImmuService_Set_0 is the handler for method Set on the database
 func request_ImmuService_Set_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.SetRequest
 	var metadata runtime.ServerMetadata
@@ -185,27 +194,11 @@ func request_ImmuService_Set_0(ctx context.Context, marshaler runtime.Marshaler,
 
 }
 
-func request_ImmuService_VerifiableSet_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq schema.VerifiableSetRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.VerifiableSet(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
 var (
 	filter_ImmuService_Get_0 = &utilities.DoubleArray{Encoding: map[string]int{"key": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 )
 
+// request_ImmuService_Get_0 is the handler for method Get on the database
 func request_ImmuService_Get_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.KeyRequest
 	var metadata runtime.ServerMetadata
@@ -240,23 +233,7 @@ func request_ImmuService_Get_0(ctx context.Context, marshaler runtime.Marshaler,
 
 }
 
-func request_ImmuService_VerifiableGet_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq schema.VerifiableGetRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.VerifiableGet(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
+// request_ImmuService_Delete_0 is the handler for method Delete on the database
 func request_ImmuService_Delete_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.DeleteKeysRequest
 	var metadata runtime.ServerMetadata
@@ -274,6 +251,7 @@ func request_ImmuService_Delete_0(ctx context.Context, marshaler runtime.Marshal
 
 }
 
+// request_ImmuService_GetAll_0 is the handler for method GetAll on the database
 func request_ImmuService_GetAll_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.KeyListRequest
 	var metadata runtime.ServerMetadata
@@ -291,6 +269,7 @@ func request_ImmuService_GetAll_0(ctx context.Context, marshaler runtime.Marshal
 
 }
 
+// request_ImmuService_ExecAll_0 is the handler for method ExecAll on the database
 func request_ImmuService_ExecAll_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.ExecAllRequest
 	var metadata runtime.ServerMetadata
@@ -308,6 +287,7 @@ func request_ImmuService_ExecAll_0(ctx context.Context, marshaler runtime.Marsha
 
 }
 
+// request_ImmuService_Scan_0 is the handler for method Scan on the database
 func request_ImmuService_Scan_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.ScanRequest
 	var metadata runtime.ServerMetadata
@@ -325,6 +305,7 @@ func request_ImmuService_Scan_0(ctx context.Context, marshaler runtime.Marshaler
 
 }
 
+// request_ImmuService_Count_0 	is the handler for method Count on the database
 func request_ImmuService_Count_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.KeyPrefix
 	var metadata runtime.ServerMetadata
@@ -352,6 +333,7 @@ func request_ImmuService_Count_0(ctx context.Context, marshaler runtime.Marshale
 
 }
 
+// request_ImmuService_CountAll_0 is the handler for method CountAll on the database
 func request_ImmuService_CountAll_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq empty.Empty
 	var metadata runtime.ServerMetadata
@@ -365,6 +347,7 @@ var (
 	filter_ImmuService_TxById_0 = &utilities.DoubleArray{Encoding: map[string]int{"tx": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 )
 
+// request_ImmuService_TxById_0 is the handler for method TxById on the database
 func request_ImmuService_TxById_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.TxRequest
 	var metadata runtime.ServerMetadata
@@ -399,44 +382,7 @@ func request_ImmuService_TxById_0(ctx context.Context, marshaler runtime.Marshal
 
 }
 
-var (
-	filter_ImmuService_VerifiableTxById_0 = &utilities.DoubleArray{Encoding: map[string]int{"tx": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
-)
-
-func request_ImmuService_VerifiableTxById_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq schema.VerifiableTxRequest
-	var metadata runtime.ServerMetadata
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["tx"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "tx")
-	}
-
-	protoReq.Tx, err = runtime.Uint64(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "tx", err)
-	}
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ImmuService_VerifiableTxById_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.VerifiableTxById(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
+// request_ImmuService_TxScan_0 is the handler for method TxScan on the database
 func request_ImmuService_TxScan_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.TxScanRequest
 	var metadata runtime.ServerMetadata
@@ -454,6 +400,7 @@ func request_ImmuService_TxScan_0(ctx context.Context, marshaler runtime.Marshal
 
 }
 
+// request_ImmuService_History_0 is the handler for method History on the database
 func request_ImmuService_History_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.HistoryRequest
 	var metadata runtime.ServerMetadata
@@ -471,6 +418,7 @@ func request_ImmuService_History_0(ctx context.Context, marshaler runtime.Marsha
 
 }
 
+// request_ImmuService_ServerInfo_0 is the handler for method ServerInfo on the database
 func request_ImmuService_ServerInfo_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.ServerInfoRequest
 	var metadata runtime.ServerMetadata
@@ -480,6 +428,7 @@ func request_ImmuService_ServerInfo_0(ctx context.Context, marshaler runtime.Mar
 
 }
 
+// request_ImmuService_Health_0 is the handler for method Health on the database
 func request_ImmuService_Health_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq empty.Empty
 	var metadata runtime.ServerMetadata
@@ -489,6 +438,7 @@ func request_ImmuService_Health_0(ctx context.Context, marshaler runtime.Marshal
 
 }
 
+// request_ImmuService_DatabaseHealth_0 is the handler for method DatabaseHealth on the database
 func request_ImmuService_DatabaseHealth_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq empty.Empty
 	var metadata runtime.ServerMetadata
@@ -498,6 +448,7 @@ func request_ImmuService_DatabaseHealth_0(ctx context.Context, marshaler runtime
 
 }
 
+// request_ImmuService_CurrentState_0 is the handler for method CurrentState on the database
 func request_ImmuService_CurrentState_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq empty.Empty
 	var metadata runtime.ServerMetadata
@@ -507,6 +458,7 @@ func request_ImmuService_CurrentState_0(ctx context.Context, marshaler runtime.M
 
 }
 
+// request_ImmuService_SetReference_0 is the handler for method SetReference on the database
 func request_ImmuService_SetReference_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.ReferenceRequest
 	var metadata runtime.ServerMetadata
@@ -524,23 +476,7 @@ func request_ImmuService_SetReference_0(ctx context.Context, marshaler runtime.M
 
 }
 
-func request_ImmuService_VerifiableSetReference_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq schema.VerifiableReferenceRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.VerifiableSetReference(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
+// request_ImmuService_ZAdd_0 is the handler for method ZAdd on the database
 func request_ImmuService_ZAdd_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.ZAddRequest
 	var metadata runtime.ServerMetadata
@@ -558,23 +494,7 @@ func request_ImmuService_ZAdd_0(ctx context.Context, marshaler runtime.Marshaler
 
 }
 
-func request_ImmuService_VerifiableZAdd_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq schema.VerifiableZAddRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.VerifiableZAdd(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
+// request_ImmuService_ZScan_0 is the handler for method ZScan on the database
 func request_ImmuService_ZScan_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.ZScanRequest
 	var metadata runtime.ServerMetadata
@@ -592,6 +512,7 @@ func request_ImmuService_ZScan_0(ctx context.Context, marshaler runtime.Marshale
 
 }
 
+// request_ImmuService_CreateDatabase_0 is the handler for method CreateDatabase on the database
 func request_ImmuService_CreateDatabase_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq schema.Database
 	var metadata runtime.ServerMetadata
@@ -908,23 +829,6 @@ func request_ImmuService_DescribeTable_0(ctx context.Context, marshaler runtime.
 	}
 
 	msg, err := client.DescribeTable(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func request_ImmuService_VerifiableSQLGet_0(ctx context.Context, marshaler runtime.Marshaler, client schema.ImmuServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq schema.VerifiableSQLGetRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.VerifiableSQLGet(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
@@ -1623,32 +1527,32 @@ func RegisterImmuServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
-	// mux.Handle("POST", api.Pattern_ImmuService_CreateDatabaseV2_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	mux.Handle("POST", api.Pattern_ImmuService_CreateDatabaseV2_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		client, err := getClientForDb(pathParams, gwclient)
+		if err != nil {
+			runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	resp, md, err := request_ImmuService_CreateDatabaseV2_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		resp, md, err := request_ImmuService_CreateDatabaseV2_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	forward_ImmuService_CreateDatabaseV2_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ImmuService_CreateDatabaseV2_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// })
+	})
 
 	mux.Handle("POST", api.Pattern_ImmuService_LoadDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -1758,32 +1662,32 @@ func RegisterImmuServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
-	// mux.Handle("POST", api.Pattern_ImmuService_DatabaseListV2_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	mux.Handle("POST", api.Pattern_ImmuService_DatabaseListV2_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		client, err := getClientForDb(pathParams, gwclient)
+		if err != nil {
+			runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	resp, md, err := request_ImmuService_DatabaseListV2_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		resp, md, err := request_ImmuService_DatabaseListV2_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	forward_ImmuService_DatabaseListV2_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ImmuService_DatabaseListV2_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// })
+	})
 
 	mux.Handle("POST", api.Pattern_ImmuService_UpdateDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -1812,32 +1716,32 @@ func RegisterImmuServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
-	// mux.Handle("POST", api.Pattern_ImmuService_UpdateDatabaseV2_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	mux.Handle("POST", api.Pattern_ImmuService_UpdateDatabaseV2_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		client, err := getClientForDb(pathParams, gwclient)
+		if err != nil {
+			runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	resp, md, err := request_ImmuService_UpdateDatabaseV2_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		resp, md, err := request_ImmuService_UpdateDatabaseV2_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	forward_ImmuService_UpdateDatabaseV2_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ImmuService_UpdateDatabaseV2_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// })
+	})
 
 	mux.Handle("POST", api.Pattern_ImmuService_GetDatabaseSettings_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -1866,32 +1770,32 @@ func RegisterImmuServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
-	// mux.Handle("POST", api.Pattern_ImmuService_GetDatabaseSettingsV2_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	mux.Handle("POST", api.Pattern_ImmuService_GetDatabaseSettingsV2_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		client, err := getClientForDb(pathParams, gwclient)
+		if err != nil {
+			runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	resp, md, err := request_ImmuService_GetDatabaseSettingsV2_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		resp, md, err := request_ImmuService_GetDatabaseSettingsV2_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	forward_ImmuService_GetDatabaseSettingsV2_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ImmuService_GetDatabaseSettingsV2_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// })
+	})
 
 	mux.Handle("GET", api.Pattern_ImmuService_FlushIndex_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -2001,32 +1905,32 @@ func RegisterImmuServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
-	// mux.Handle("GET", api.Pattern_ImmuService_ListTables_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-	// 	ctx, cancel := context.WithCancel(req.Context())
-	// 	defer cancel()
-	// 	inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-	// 	rctx, err := runtime.AnnotateContext(ctx, mux, req)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+	mux.Handle("GET", api.Pattern_ImmuService_ListTables_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	client, err := getClientForDb(pathParams, gwclient)
-	// 	if err != nil {
-	// 		runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		client, err := getClientForDb(pathParams, gwclient)
+		if err != nil {
+			runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	resp, md, err := request_ImmuService_ListTables_0(rctx, inboundMarshaler, client, req, pathParams)
-	// 	ctx = runtime.NewServerMetadataContext(ctx, md)
-	// 	if err != nil {
-	// 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-	// 		return
-	// 	}
+		resp, md, err := request_ImmuService_ListTables_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
 
-	// 	forward_ImmuService_ListTables_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ImmuService_ListTables_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	// })
+	})
 
 	mux.Handle("POST", api.Pattern_ImmuService_DescribeTable_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -2075,11 +1979,7 @@ var (
 
 	forward_ImmuService_Set_0 = runtime.ForwardResponseMessage
 
-	forward_ImmuService_VerifiableSet_0 = runtime.ForwardResponseMessage
-
 	forward_ImmuService_Get_0 = runtime.ForwardResponseMessage
-
-	forward_ImmuService_VerifiableGet_0 = runtime.ForwardResponseMessage
 
 	forward_ImmuService_Delete_0 = runtime.ForwardResponseMessage
 
@@ -2095,8 +1995,6 @@ var (
 
 	forward_ImmuService_TxById_0 = runtime.ForwardResponseMessage
 
-	forward_ImmuService_VerifiableTxById_0 = runtime.ForwardResponseMessage
-
 	forward_ImmuService_TxScan_0 = runtime.ForwardResponseMessage
 
 	forward_ImmuService_History_0 = runtime.ForwardResponseMessage
@@ -2111,11 +2009,7 @@ var (
 
 	forward_ImmuService_SetReference_0 = runtime.ForwardResponseMessage
 
-	forward_ImmuService_VerifiableSetReference_0 = runtime.ForwardResponseMessage
-
 	forward_ImmuService_ZAdd_0 = runtime.ForwardResponseMessage
-
-	forward_ImmuService_VerifiableZAdd_0 = runtime.ForwardResponseMessage
 
 	forward_ImmuService_ZScan_0 = runtime.ForwardResponseMessage
 
@@ -2156,6 +2050,4 @@ var (
 	forward_ImmuService_ListTables_0 = runtime.ForwardResponseMessage
 
 	forward_ImmuService_DescribeTable_0 = runtime.ForwardResponseMessage
-
-	forward_ImmuService_VerifiableSQLGet_0 = runtime.ForwardResponseMessage
 )
