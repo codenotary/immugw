@@ -24,21 +24,22 @@ import (
 	"testing"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immudb/pkg/client"
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/clienttest"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
+
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stretchr/testify/require"
 )
 
-func testHistoryHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
+func testHistoryHandler(t *testing.T, mux *runtime.ServeMux, client immugwclient.Client, opts *immuclient.Options) {
 	prefixPattern := "HistoryHandler - Test case: %s"
 	method := "POST"
-	for _, tc := range historyHandlerTestCases(mux, ic) {
-		path := "/db/history/"
+	for _, tc := range historyHandlerTestCases(mux, client, opts) {
+		path := "/db/defaultdb/history/"
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-			tc.historyHandler.History(res, req, nil)
+			tc.historyHandler.History(res, req, defaultTestParams)
 		}
 		err := testHandler(
 			t,
@@ -60,11 +61,11 @@ type historyHandlerTestCase struct {
 	testFunc       func(*testing.T, string, int, map[string]interface{})
 }
 
-func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []historyHandlerTestCase {
+func historyHandlerTestCases(mux *runtime.ServeMux, client immugwclient.Client, opts *immuclient.Options) []historyHandlerTestCase {
 	rt := newDefaultRuntime()
 	defaultJSON := json.DefaultJSON()
-	hh := NewHistoryHandler(mux, ic, rt, defaultJSON)
-	icd, _ := client.NewImmuClient(client.DefaultOptions())
+	hh := NewHistoryHandler(mux, client, rt, defaultJSON)
+	icd, _ := immuclient.NewImmuClient(immuclient.DefaultOptions())
 	historyWErr := func(context.Context, *schema.HistoryRequest) (*schema.Entries, error) {
 		return nil, errors.New("history error")
 	}
@@ -123,7 +124,7 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"AnnotateContext error",
-			NewHistoryHandler(mux, ic, newTestRuntimeWithAnnotateContextErr(), defaultJSON),
+			NewHistoryHandler(mux, client, newTestRuntimeWithAnnotateContextErr(), defaultJSON),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -133,7 +134,7 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"History error",
-			NewHistoryHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, HistoryF: historyWErr}, rt, defaultJSON),
+			NewHistoryHandler(mux, immugwclient.NewMockClient(&clienttest.ImmuClientMock{ImmuClient: icd, HistoryF: historyWErr}, opts), rt, defaultJSON),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -143,7 +144,7 @@ func historyHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"JSON marshal error",
-			NewHistoryHandler(mux, ic, rt, newTestJSONWithMarshalErr()),
+			NewHistoryHandler(mux, client, rt, newTestJSONWithMarshalErr()),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)

@@ -22,7 +22,7 @@ import (
 	"net/http"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immudb/pkg/client"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
@@ -37,13 +37,13 @@ type VerifiedSetHandler interface {
 
 type verifiedSetHandler struct {
 	mux     *runtime.ServeMux
-	client  client.ImmuClient
+	client  immugwclient.Client
 	runtime Runtime
 	json    json.JSON
 }
 
 // NewVerifiedSetHandler ...
-func NewVerifiedSetHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) VerifiedSetHandler {
+func NewVerifiedSetHandler(mux *runtime.ServeMux, client immugwclient.Client, rt Runtime, json json.JSON) VerifiedSetHandler {
 	return &verifiedSetHandler{
 		mux:     mux,
 		client:  client,
@@ -60,6 +60,17 @@ func (h *verifiedSetHandler) VerifiedSet(w http.ResponseWriter, req *http.Reques
 	rctx, err := h.runtime.AnnotateContext(ctx, h.mux, req)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
+		return
+	}
+
+	databasename, ok := pathParams["databaseName"]
+	if !ok {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "missing parameter %s", "databaseName"))
+		return
+	}
+	client, err := h.client.For(databasename)
+	if err != nil {
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, err)
 		return
 	}
 
@@ -90,7 +101,7 @@ func (h *verifiedSetHandler) VerifiedSet(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	msg, err := h.client.VerifiedSet(rctx, protoReq.SetRequest.KVs[0].Key, protoReq.SetRequest.KVs[0].Value)
+	msg, err := client.VerifiedSet(rctx, protoReq.SetRequest.KVs[0].Key, protoReq.SetRequest.KVs[0].Value)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
 		return

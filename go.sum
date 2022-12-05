@@ -121,8 +121,8 @@ github.com/cockroachdb/apd v1.1.0 h1:3LFP3629v+1aKXU5Q37mxmRxX/pIu1nijXydLShEq5I
 github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMeY4+DwBQ=
 github.com/codenotary/daemon v0.0.0-20200507161650-3d4bcb5230f4 h1:5mhTmqO2f6QXPlIAGCEtCYR2MHNDLVkwaGWiSbffeQU=
 github.com/codenotary/daemon v0.0.0-20200507161650-3d4bcb5230f4/go.mod h1:PFDPquCi+3LI5PpAKS/8LvJBHTfkdsEXfGtANGx9hH4=
-github.com/codenotary/immudb v1.4.0 h1:VDcqwhCVBNl4LJ8wPYo5FjrbdwRyE7PN7Cp0Rm+/vA0=
-github.com/codenotary/immudb v1.4.0/go.mod h1:TBSnyZYdbWf8xaJ3N2YWkpXWyAxtHvpxsjlHvrvXt6Y=
+github.com/codenotary/immudb v1.4.1 h1:ChMYZULvUQ1JPpzAj84ZkhkpC8Zv/70x6NwRI/dYn+M=
+github.com/codenotary/immudb v1.4.1/go.mod h1:TBSnyZYdbWf8xaJ3N2YWkpXWyAxtHvpxsjlHvrvXt6Y=
 github.com/containerd/console v1.0.3/go.mod h1:7LqA/THxQ86k76b8c/EMSiaJ3h1eZkMkXar0TQ1gf3U=
 github.com/containerd/continuity v0.3.0/go.mod h1:wJEAIwKOm/pBZuBd0JmeTvnLquTB1Ag8espWhkykbPM=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=

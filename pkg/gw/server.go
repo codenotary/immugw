@@ -31,9 +31,9 @@ import (
 	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/client/state"
 	"github.com/codenotary/immugw/pkg/api"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
-	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/immuos"
 	"github.com/codenotary/immudb/pkg/server"
 	"github.com/codenotary/immugw/pkg/json"
@@ -49,7 +49,9 @@ func (s *ImmuGwServer) Start() error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	ic, err := immuclient.NewImmuClient(&s.CliOptions)
+	client := immugwclient.New(&s.CliOptions)
+
+	ic, err := client.Add("defaultdb") // TODO: fix this and make this dynamic
 	if err != nil {
 		s.Logger.Errorf("unable to instantiate client: %s", err)
 		return err
@@ -64,27 +66,27 @@ func (s *ImmuGwServer) Start() error {
 	rt := DefaultRuntime()
 	json := json.DefaultJSON()
 
-	sh := NewSetHandler(mux, ic, rt, json)
-	ssh := NewVerifiedSetHandler(mux, ic, rt, json)
-	sgh := NewVerifiedGetHandler(mux, ic, rt, json)
-	hh := NewHistoryHandler(mux, ic, rt, json)
-	sr := NewSafeReferenceHandler(mux, ic, rt, json)
-	sza := NewVerifiedZaddHandler(mux, ic, rt, json)
-	udb := NewUseDatabaseHandler(mux, ic, rt, json)
-	tx := NewVerifiedTxByIdHandler(mux, ic, rt, json)
-	vsql := NewVerifiedSQLGetHandler(mux, ic, rt, json)
+	sh := NewSetHandler(mux, client, rt, json)
+	ssh := NewVerifiedSetHandler(mux, client, rt, json)
+	sgh := NewVerifiedGetHandler(mux, client, rt, json)
+	hh := NewHistoryHandler(mux, client, rt, json)
+	sr := NewSafeReferenceHandler(mux, client, rt, json)
+	sza := NewVerifiedZaddHandler(mux, client, rt, json)
+	udb := NewUseDatabaseHandler(mux, client, rt, json)
+	tx := NewVerifiedTxByIdHandler(mux, client, rt, json)
+	vsql := NewVerifiedSQLGetHandler(mux, client, rt, json)
 
-	mux.Handle(http.MethodPost, schema.Pattern_ImmuService_Set_0(), sh.Set)
+	mux.Handle(http.MethodPost, api.Pattern_ImmuService_Set_0, sh.Set)
 	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedSet_0(), ssh.VerifiedSet)
 	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedGet_0(), sgh.VerifiedGet)
-	mux.Handle(http.MethodPost, schema.Pattern_ImmuService_History_0(), hh.History)
+	mux.Handle(http.MethodPost, api.Pattern_ImmuService_History_0, hh.History)
 	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedSetReference_0(), sr.SafeReference)
 	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiedZAdd_0(), sza.VerifiedZadd)
 	mux.Handle(http.MethodGet, schema.Pattern_ImmuService_UseDatabase_0(), udb.UseDatabase)
 	mux.Handle(http.MethodGet, api.Pattern_ImmuService_VerifiedTxById_0(), tx.VerifiedTxById)
 	mux.Handle(http.MethodPost, api.Pattern_ImmuService_VerifiableSQLGet_0(), vsql.VerifiedSQLGetHandler)
 
-	err = schema.RegisterImmuServiceHandlerClient(ctx, mux, ic.GetServiceClient())
+	err = RegisterImmuServiceHandlerClient(ctx, mux, client, ic.GetServiceClient())
 	if err != nil {
 		s.Logger.Errorf("unable to register client handlers: %s", err)
 		return err

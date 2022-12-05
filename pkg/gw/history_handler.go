@@ -18,12 +18,13 @@ package gw
 
 import (
 	"context"
-	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 	"io"
 	"net/http"
 
-	"github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immudb/pkg/api/schema"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
+	"github.com/grpc-ecosystem/grpc-gateway/utilities"
+
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc/codes"
@@ -37,13 +38,13 @@ type HistoryHandler interface {
 
 type historyHandler struct {
 	mux     *runtime.ServeMux
-	client  client.ImmuClient
+	client  immugwclient.Client
 	runtime Runtime
 	json    json.JSON
 }
 
 // NewHistoryHandler ...
-func NewHistoryHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) HistoryHandler {
+func NewHistoryHandler(mux *runtime.ServeMux, client immugwclient.Client, rt Runtime, json json.JSON) HistoryHandler {
 	return &historyHandler{mux, client, rt, json}
 }
 
@@ -55,6 +56,17 @@ func (h *historyHandler) History(w http.ResponseWriter, req *http.Request, pathP
 	rctx, err := h.runtime.AnnotateContext(ctx, h.mux, req)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, err)
+		return
+	}
+
+	databasename, ok := pathParams["databaseName"]
+	if !ok {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "missing parameter %s", "databaseName"))
+		return
+	}
+	client, err := h.client.For(databasename)
+	if err != nil {
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, err)
 		return
 	}
 
@@ -71,7 +83,7 @@ func (h *historyHandler) History(w http.ResponseWriter, req *http.Request, pathP
 		return
 	}
 
-	msg, err := h.client.History(rctx, &protoReq)
+	msg, err := client.History(rctx, &protoReq)
 	ctx = h.runtime.NewServerMetadataContext(ctx, metadata)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))

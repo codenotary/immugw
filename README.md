@@ -208,7 +208,7 @@ curl --location --request POST '127.0.0.1:3323/login' \
 ```
 #### Verified Set
 ```shell script
-curl --location --request POST '127.0.0.1:3323/db/verified/set' \
+curl --location --request POST '127.0.0.1:3323/db/{database_name}/verified/set' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: {{token}}' \
 --data-raw '{
@@ -224,7 +224,7 @@ curl --location --request POST '127.0.0.1:3323/db/verified/set' \
 ```
 #### Verified Get
 ```shell script
-curl --location --request POST '127.0.0.1:3323/db/verified/get' \
+curl --location --request POST '127.0.0.1:3323/db/{database_name}/verified/get' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: {{token}}' \
 --data-raw '{
@@ -235,7 +235,7 @@ curl --location --request POST '127.0.0.1:3323/db/verified/get' \
 ```
 #### Verified Reference
 ```shell script
-curl --location --request POST '127.0.0.1:3323/db/verified/setreference' \
+curl --location --request POST '127.0.0.1:3323/db/{database_name}/verified/setreference' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: {{token}}' \
 --data-raw '{
@@ -248,7 +248,7 @@ curl --location --request POST '127.0.0.1:3323/db/verified/setreference' \
 ```
 #### Verified ZAdd
 ```shell script
-curl --location --request POST '127.0.0.1:3323/db/verified/zadd' \
+curl --location --request POST '127.0.0.1:3323/db/{database_name}/verified/zadd' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: {{token}}' \
 --data-raw '{
@@ -262,7 +262,7 @@ curl --location --request POST '127.0.0.1:3323/db/verified/zadd' \
 ```
 #### ZScan
 ```shell script
-curl --location --request POST '127.0.0.1:3323/db/zscan' \
+curl --location --request POST '127.0.0.1:3323/db/{database_name}/zscan' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: {{token}}' \
 --data-raw '{
@@ -271,7 +271,7 @@ curl --location --request POST '127.0.0.1:3323/db/zscan' \
 ```
 #### History
 ```shell script
-curl --location --request POST '127.0.0.1:3323/db/history' \
+curl --location --request POST '127.0.0.1:3323/db/{database_name}/history' \
 --header 'Authorization: {{token}}' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -280,13 +280,13 @@ curl --location --request POST '127.0.0.1:3323/db/history' \
 ```
 #### Verified Transaction
 ```shell script
-curl --location --request GET '127.0.0.1:3323/db/verified/tx/1' \
+curl --location --request GET '127.0.0.1:3323/db/{database_name}/verified/tx/1' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: {{token}}'
 ```
 #### SQL Exec
 ```shell script
-curl --location --request POST '127.0.0.1:3323/db/sqlexec' \
+curl --location --request POST '127.0.0.1:3323/db/{database_name}/sqlexec' \
 --header 'Authorization: {{token}}' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -296,7 +296,7 @@ curl --location --request POST '127.0.0.1:3323/db/sqlexec' \
 
 #### SQL Exec insert
 ```shell script
-curl --location --request POST '127.0.0.1:3323/db/sqlexec' \
+curl --location --request POST '127.0.0.1:3323/db/{database_name}/sqlexec' \
 --header 'Authorization: v2.public.eyJkYXRhYmFzZSI6IjUiLCJleHAiOiIyMDIxLTEwLTI4VDE4OjU1OjAyKzAyOjAwIiwic3ViIjoiaW1tdWRiIn3-aNUXqydajYFR9Aa7-q40JepLuA0tsPXeR1nRo75jA1H45RZZU9Twt6EVi-4bS4gpzeQcRNEdJs8U5oM5urcM.aW1tdWRi' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -306,7 +306,7 @@ curl --location --request POST '127.0.0.1:3323/db/sqlexec' \
 > byte arrays need to be hex encoded
 #### SQL Query
 ```shell script
-curl --location --request POST '127.0.0.1:3323/db/sqlquery' \
+curl --location --request POST '127.0.0.1:3323/db/{database_name}/sqlquery' \
 --header 'Authorization: {{token}}' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -317,7 +317,7 @@ curl --location --request POST '127.0.0.1:3323/db/sqlquery' \
 #### SQL Verified sql row
 Its possible also to tamperproof verify a SQL row.
 ```shell script
-curl --location --request POST '127.0.0.1:3323/db/verified/row' \
+curl --location --request POST '127.0.0.1:3323/db/{database_name}/verified/row' \
 --header 'Authorization: v2.public.eyJkYXRhYmFzZSI6IjUiLCJleHAiOiIyMDIxLTEwLTI4VDE4OjU1OjAyKzAyOjAwIiwic3ViIjoiaW1tdWRiIn3-aNUXqydajYFR9Aa7-q40JepLuA0tsPXeR1nRo75jA1H45RZZU9Twt6EVi-4bS4gpzeQcRNEdJs8U5oM5urcM.aW1tdWRi' \
 --header 'Content-Type: application/json' \
 --data-raw '{

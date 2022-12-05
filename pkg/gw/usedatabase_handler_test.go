@@ -27,19 +27,19 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immudb/pkg/client"
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/clienttest"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stretchr/testify/require"
 )
 
-func testUseDatabaseHandler(t *testing.T, ctx context.Context, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
+func testUseDatabaseHandler(t *testing.T, ctx context.Context, mux *runtime.ServeMux, client immugwclient.Client, opts *immuclient.Options) {
 	prefixPattern := "UseDatabaseHandler - Test case: %s"
 	method := "GET"
 	md, _ := metadata.FromOutgoingContext(ctx)
-	for _, tc := range useDatabaseHandlerTestCases(mux, ic, ctx) {
+	for _, tc := range useDatabaseHandlerTestCases(mux, client, ctx, opts) {
 		path := "/db/use/" + tc.dbname
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 			var pathParams map[string]string
@@ -69,17 +69,19 @@ type useDatabaseHandlerTestCase struct {
 	testFunc           func(*testing.T, string, int, map[string]interface{})
 }
 
-func useDatabaseHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient, ctx context.Context) []useDatabaseHandlerTestCase {
+func useDatabaseHandlerTestCases(mux *runtime.ServeMux, client immugwclient.Client, ctx context.Context, opts *immuclient.Options) []useDatabaseHandlerTestCase {
 	rt := newDefaultRuntime()
 	defaultJSON := json.DefaultJSON()
-	hh := NewUseDatabaseHandler(mux, ic, rt, defaultJSON)
-	icd, _ := client.NewImmuClient(client.DefaultOptions())
+	hh := NewUseDatabaseHandler(mux, client, rt, defaultJSON)
+	icd, _ := immuclient.NewImmuClient(immuclient.DefaultOptions())
 	useDatabaseWErr := func(ctx context.Context, d *schema.Database) (*schema.UseDatabaseReply, error) {
 		return nil, errors.New("useDatabase error")
 	}
 	dbName := "dbtest"
 
-	err := ic.CreateDatabase(ctx, &schema.DatabaseSettings{
+	ic, err := client.Add("dbtest")
+
+	err = ic.CreateDatabase(ctx, &schema.DatabaseSettings{
 		DatabaseName: dbName,
 	})
 	if err != nil {
@@ -116,7 +118,7 @@ func useDatabaseHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient
 		},
 		{
 			"AnnotateContext error",
-			NewUseDatabaseHandler(mux, ic, newTestRuntimeWithAnnotateContextErr(), defaultJSON),
+			NewUseDatabaseHandler(mux, client, newTestRuntimeWithAnnotateContextErr(), defaultJSON),
 			dbName,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -126,7 +128,7 @@ func useDatabaseHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient
 		},
 		{
 			"UseDatabase error",
-			NewUseDatabaseHandler(mux, &clienttest.ImmuClientMock{ImmuClient: icd, UseDatabaseF: useDatabaseWErr}, rt, defaultJSON),
+			NewUseDatabaseHandler(mux, immugwclient.NewMockClientWithDb(&clienttest.ImmuClientMock{ImmuClient: icd, UseDatabaseF: useDatabaseWErr}, opts, dbName), rt, defaultJSON),
 			dbName,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -136,7 +138,7 @@ func useDatabaseHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient
 		},
 		{
 			"JSON marshal error",
-			NewUseDatabaseHandler(mux, ic, rt, newTestJSONWithMarshalErr()),
+			NewUseDatabaseHandler(mux, client, rt, newTestJSONWithMarshalErr()),
 			dbName,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)

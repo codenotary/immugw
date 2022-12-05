@@ -40,3 +40,5 @@ token
 token_admin
 tools/mtls
 
+# client states
+state-*

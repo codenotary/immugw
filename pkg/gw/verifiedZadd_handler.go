@@ -22,7 +22,7 @@ import (
 	"net/http"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immudb/pkg/client"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
@@ -37,13 +37,13 @@ type VerifiedZaddHandler interface {
 
 type verifiedZaddHandler struct {
 	mux     *runtime.ServeMux
-	client  client.ImmuClient
+	client  immugwclient.Client
 	runtime Runtime
 	json    json.JSON
 }
 
 // NewVerifiedZaddHandler ...
-func NewVerifiedZaddHandler(mux *runtime.ServeMux, client client.ImmuClient, rt Runtime, json json.JSON) VerifiedZaddHandler {
+func NewVerifiedZaddHandler(mux *runtime.ServeMux, client immugwclient.Client, rt Runtime, json json.JSON) VerifiedZaddHandler {
 	return &verifiedZaddHandler{
 		mux:     mux,
 		client:  client,
@@ -63,6 +63,17 @@ func (h *verifiedZaddHandler) VerifiedZadd(w http.ResponseWriter, req *http.Requ
 		return
 	}
 
+	databasename, exists := pathParams["databaseName"]
+	if !exists {
+		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Errorf(codes.InvalidArgument, "missing parameter %s", "key"))
+		return
+	}
+	client, err := h.client.For(databasename)
+	if err != nil {
+		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, err)
+		return
+	}
+
 	var protoReq schema.VerifiableZAddRequest
 	var metadata runtime.ServerMetadata
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -78,7 +89,7 @@ func (h *verifiedZaddHandler) VerifiedZadd(w http.ResponseWriter, req *http.Requ
 		h.runtime.HTTPError(rctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "incorrect JSON payload"))
 		return
 	}
-	msg, err := h.client.VerifiedZAddAt(rctx, protoReq.ZAddRequest.Set, protoReq.ZAddRequest.Score, protoReq.ZAddRequest.Key, protoReq.ZAddRequest.AtTx)
+	msg, err := client.VerifiedZAddAt(rctx, protoReq.ZAddRequest.Set, protoReq.ZAddRequest.Score, protoReq.ZAddRequest.Key, protoReq.ZAddRequest.AtTx)
 	ctx = h.runtime.NewServerMetadataContext(rctx, metadata)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))

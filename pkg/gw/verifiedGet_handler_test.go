@@ -20,24 +20,26 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/api/schema"
 	"net/http"
 	"testing"
 
+	"github.com/codenotary/immudb/pkg/api/schema"
 	immuclient "github.com/codenotary/immudb/pkg/client"
+
 	"github.com/codenotary/immudb/pkg/client/clienttest"
+	immugwclient "github.com/codenotary/immugw/pkg/client"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/stretchr/testify/require"
 )
 
-func testSafeGetHandler(t *testing.T, mux *runtime.ServeMux, ic immuclient.ImmuClient) {
+func testSafeGetHandler(t *testing.T, mux *runtime.ServeMux, client immugwclient.Client, opts *immuclient.Options) {
 	prefixPattern := "SafeGetHandler - Test case: %s"
 	method := "POST"
-	path := "/db/verified/get"
-	for _, tc := range safeGetHandlerTestCases(mux, ic) {
+	path := "/db/defaultdb/verified/get"
+	for _, tc := range safeGetHandlerTestCases(mux, client, opts) {
 		handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-			tc.safeGetHandler.VerifiedGet(res, req, nil)
+			tc.safeGetHandler.VerifiedGet(res, req, defaultTestParams)
 		}
 		err := testHandler(
 			t,
@@ -59,10 +61,10 @@ type safeGetHandlerTestCase struct {
 	testFunc       func(*testing.T, string, int, map[string]interface{})
 }
 
-func safeGetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []safeGetHandlerTestCase {
+func safeGetHandlerTestCases(mux *runtime.ServeMux, client immugwclient.Client, opts *immuclient.Options) []safeGetHandlerTestCase {
 	rt := newDefaultRuntime()
 	defaultJSON := json.DefaultJSON()
-	sgh := NewVerifiedGetHandler(mux, ic, rt, defaultJSON)
+	sgh := NewVerifiedGetHandler(mux, client, rt, defaultJSON)
 	//icd := client.DefaultClient()
 	verifiedGetWErr := func(context.Context, []byte, uint64) (*schema.Entry, error) {
 		return nil, errors.New("verified get error")
@@ -128,7 +130,7 @@ func safeGetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"AnnotateContext error",
-			NewVerifiedGetHandler(mux, ic, newTestRuntimeWithAnnotateContextErr(), defaultJSON),
+			NewVerifiedGetHandler(mux, client, newTestRuntimeWithAnnotateContextErr(), defaultJSON),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -138,7 +140,7 @@ func safeGetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"VerifiedGet error",
-			NewVerifiedGetHandler(mux, &clienttest.ImmuClientMock{VerifiedGetAtF: verifiedGetWErr}, rt, defaultJSON),
+			NewVerifiedGetHandler(mux, immugwclient.NewMockClient(&clienttest.ImmuClientMock{VerifiedGetAtF: verifiedGetWErr}, opts), rt, defaultJSON),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
@@ -148,7 +150,7 @@ func safeGetHandlerTestCases(mux *runtime.ServeMux, ic immuclient.ImmuClient) []
 		},
 		{
 			"JSON marshal error",
-			NewVerifiedGetHandler(mux, ic, rt, newTestJSONWithMarshalErr()),
+			NewVerifiedGetHandler(mux, client, rt, newTestJSONWithMarshalErr()),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)

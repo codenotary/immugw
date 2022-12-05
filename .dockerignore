@@ -14,3 +14,6 @@ vendor
 build
 resources
 /immudata
+
+# client states
+state-*
