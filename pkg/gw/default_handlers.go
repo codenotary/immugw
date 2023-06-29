@@ -1294,13 +1294,7 @@ func RegisterImmuServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 			return
 		}
 
-		client, err := getClientForDb(pathParams, gwclient)
-		if err != nil {
-			runtime.HTTPError(rctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		resp, md, err := request_ImmuService_ServerInfo_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ImmuService_ServerInfo_0(rctx, inboundMarshaler, defaultClient, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
