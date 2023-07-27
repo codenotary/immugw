@@ -17,12 +17,13 @@ limitations under the License.
 package gw
 
 import (
-	"github.com/codenotary/immudb/pkg/client"
 	"os"
 	"time"
 
+	"github.com/codenotary/immudb/pkg/client"
+
+	"github.com/codenotary/immudb/embedded/logger"
 	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immudb/pkg/logger"
 	"github.com/codenotary/immudb/pkg/server"
 )
 

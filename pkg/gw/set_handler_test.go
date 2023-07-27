@@ -67,7 +67,7 @@ func setHandlerTestCases(mux *runtime.ServeMux, client immugwclient.Client, opts
 	sh := NewSetHandler(mux, client, rt, json)
 	icd, _ := immuclient.NewImmuClient(immuclient.DefaultOptions())
 
-	setWErr := func(context.Context, []byte, []byte) (*schema.TxHeader, error) {
+	setAllWErr := func(context.Context, *schema.SetRequest) (*schema.TxHeader, error) {
 		return nil, errors.New("set error")
 	}
 
@@ -177,7 +177,7 @@ func setHandlerTestCases(mux *runtime.ServeMux, client immugwclient.Client, opts
 		},
 		{
 			"Set error",
-			NewSetHandler(mux, immugwclient.NewMockClient(&clienttest.ImmuClientMock{ImmuClient: icd, SetF: setWErr}, opts), rt, json),
+			NewSetHandler(mux, immugwclient.NewMockClient(&clienttest.ImmuClientMock{ImmuClient: icd, SetAllF: setAllWErr}, opts), rt, json),
 			validPayload,
 			func(t *testing.T, testCase string, status int, body map[string]interface{}) {
 				requireResponseStatus(t, testCase, http.StatusInternalServerError, status)
