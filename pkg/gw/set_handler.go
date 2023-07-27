@@ -93,17 +93,12 @@ func (h *setHandler) Set(w http.ResponseWriter, req *http.Request, pathParams ma
 		return
 	}
 
-	if len(protoReq.KVs) > 1 {
-		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "set accept only one key value pair"))
-		return
-	}
-
 	if len(protoReq.KVs) == 0 {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, status.Error(codes.InvalidArgument, "set accept at least one key value pair"))
 		return
 	}
 
-	msg, err := client.Set(rctx, protoReq.KVs[0].Key, protoReq.KVs[0].Value)
+	msg, err := client.SetAll(rctx, &protoReq)
 	ctx = h.runtime.NewServerMetadataContext(rctx, metadata)
 	if err != nil {
 		h.runtime.HTTPError(ctx, h.mux, outboundMarshaler, w, req, mapSdkError(err))
