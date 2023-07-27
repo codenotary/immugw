@@ -19,15 +19,16 @@ package gw
 import (
 	"expvar"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"sync"
 	"time"
 
+	"github.com/codenotary/immudb/pkg/api/schema"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
-	"github.com/codenotary/immudb/pkg/logger"
+	"github.com/codenotary/immudb/embedded/logger"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/prometheus/client_golang/prometheus"
 )

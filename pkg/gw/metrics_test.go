@@ -16,14 +16,15 @@ limitations under the License.
 package gw
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/codenotary/immudb/embedded/logger"
 	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immudb/pkg/logger"
 	"github.com/codenotary/immugw/pkg/json"
 	"github.com/stretchr/testify/require"
 )
@@ -64,27 +65,27 @@ func TestLastAuditHandler(t *testing.T) {
 }
 
 /*
-func TestLastAuditHandlerJSONError(t *testing.T) {
-	req, err := http.NewRequest("GET", "/lastaudit", nil)
-	require.NoError(t, err)
-	rr := httptest.NewRecorder()
+	func TestLastAuditHandlerJSONError(t *testing.T) {
+		req, err := http.NewRequest("GET", "/lastaudit", nil)
+		require.NoError(t, err)
+		rr := httptest.NewRecorder()
 
-	ms := metricServer{
-		mc:  &MetricsCollection{},
-		srv: nil,
+		ms := metricServer{
+			mc:  &MetricsCollection{},
+			srv: nil,
+		}
+
+		handlerWithJSONErr := http.HandlerFunc(ms.lastAuditHandler(newTestJSONWithMarshalErr()))
+		handlerWithJSONErr.ServeHTTP(rr, req)
+		require.Equal(
+			t,
+			http.StatusInternalServerError,
+			rr.Code,
+			"lastAuditHandler returned wrong status code: expected %v, actual %v",
+			http.StatusInternalServerError,
+			rr.Code)
+		require.Contains(t, rr.Body.String(), "JSON marshal error")
 	}
-
-	handlerWithJSONErr := http.HandlerFunc(ms.lastAuditHandler(newTestJSONWithMarshalErr()))
-	handlerWithJSONErr.ServeHTTP(rr, req)
-	require.Equal(
-		t,
-		http.StatusInternalServerError,
-		rr.Code,
-		"lastAuditHandler returned wrong status code: expected %v, actual %v",
-		http.StatusInternalServerError,
-		rr.Code)
-	require.Contains(t, rr.Body.String(), "JSON marshal error")
-}
 */
 func TestUpdateAuditResult(t *testing.T) {
 	reg := prometheus.NewRegistry()
